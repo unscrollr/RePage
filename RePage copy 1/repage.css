@@ -1,0 +1,148 @@
+/* =============================================
+   REPAGE v4.0 — repage.css
+   ============================================= */
+
+html.repage-active,
+html.repage-active body {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  scroll-behavior: auto !important;
+}
+
+#repage-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+/* ── Main bar: always on top, never greyscaled ── */
+#repage-bar {
+  isolation: isolate !important;
+  filter: none !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 2147483647 !important;
+}
+
+/* ── Sub-scroll containers ─────────────────── */
+.repage-subpaged {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+.repage-subpaged::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* ── Greyscale ─────────────────────────────── */
+html.repage-greyscale {
+  filter: grayscale(100%) !important;
+}
+html.repage-greyscale #repage-bar {
+  filter: none !important;
+  isolation: isolate !important;
+}
+
+/* ── Hide like / reaction counts ───────────── */
+html.repage-hide-likes [aria-label*="like" i],
+html.repage-hide-likes [aria-label*="reaction" i],
+html.repage-hide-likes [data-testid*="like" i],
+html.repage-hide-likes [data-testid*="heart" i],
+html.repage-hide-likes [data-testid*="favorite" i],
+html.repage-hide-likes [class*="LikeCount" i],
+html.repage-hide-likes [class*="like-count" i],
+html.repage-hide-likes [class*="reaction-count" i],
+html.repage-hide-likes [class*="voteCount" i],
+html.repage-hide-likes [class*="vote-count" i],
+html.repage-hide-likes [class*="karma" i],
+html.repage-hide-likes [class*="upvote-count" i],
+html.repage-hide-likes [class*="upvoteCount" i] {
+  visibility: hidden !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  display: inline-block !important;
+}
+
+/* ── Mute notification badges ──────────────── */
+html.repage-mute-notifs [data-testid*="badge" i],
+html.repage-mute-notifs [aria-label*="notification" i],
+html.repage-mute-notifs [class*="NotifBadge" i],
+html.repage-mute-notifs [class*="notif-badge" i],
+html.repage-mute-notifs [class*="notification-badge" i],
+html.repage-mute-notifs [class*="unread-count" i],
+html.repage-mute-notifs [class*="UnreadCount" i],
+html.repage-mute-notifs [class*="badge--count" i],
+html.repage-mute-notifs [class*="inbox-count" i] {
+  display: none !important;
+}
+
+/* ── Text-only: generic ────────────────────── */
+html.repage-text-only video,
+html.repage-text-only iframe,
+html.repage-text-only canvas,
+html.repage-text-only audio,
+html.repage-text-only [class*="mediaContainer" i],
+html.repage-text-only [class*="media-container" i],
+html.repage-text-only [class*="PhotoGrid" i],
+html.repage-text-only [class*="photo-grid" i],
+html.repage-text-only [class*="ImageContainer" i],
+html.repage-text-only [class*="image-container" i],
+html.repage-text-only [class*="videoPlayer" i],
+html.repage-text-only [class*="video-player" i],
+html.repage-text-only [data-testid="tweetPhoto"],
+html.repage-text-only [data-testid="videoPlayer"],
+html.repage-text-only [data-testid="card.layoutSmall.media"],
+html.repage-text-only [data-testid="card.layoutLarge.media"] {
+  display: none !important;
+}
+
+/* ── Text-only: LinkedIn ───────────────────── */
+html.repage-text-only .update-components-image,
+html.repage-text-only .update-components-image__image-link,
+html.repage-text-only .update-components-image__image,
+html.repage-text-only .ivm-view-attr__img--centered,
+html.repage-text-only [class*="feed-shared-image"],
+html.repage-text-only [class*="update-components-image"],
+html.repage-text-only .update-components-linkedin-video,
+html.repage-text-only .update-components-linkedin-video__content,
+html.repage-text-only [class*="feed-shared-linkedin-video"],
+html.repage-text-only [class*="update-components-linkedin-video"],
+html.repage-text-only [data-urn*="video"],
+html.repage-text-only .update-components-document,
+html.repage-text-only [class*="feed-shared-document"] {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ── Text-only: Instagram ──────────────────── */
+html.repage-text-only article img,
+html.repage-text-only article video {
+  display: none !important;
+}
+
+/* ── Text-only: Twitter/X ──────────────────── */
+html.repage-text-only [data-testid="tweetPhoto"],
+html.repage-text-only [data-testid="videoComponent"],
+html.repage-text-only [data-testid="previewInterstitial"] {
+  display: none !important;
+}
+
+/* ── Text-only: Facebook ───────────────────── */
+html.repage-text-only [data-pagelet*="FeedUnit"] img,
+html.repage-text-only [data-pagelet*="FeedUnit"] video {
+  display: none !important;
+}
+
+/* ── Text-only: Reddit ─────────────────────── */
+html.repage-text-only [class*="media-element"],
+html.repage-text-only shreddit-player,
+html.repage-text-only [class*="post-media-container"] {
+  display: none !important;
+}

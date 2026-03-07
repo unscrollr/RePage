@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RePage</title>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 360px;
+  padding: 16px 16px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+
+  --bg:         #000000;
+  --bg2:        #0f0f0f;
+  --bg3:        #1c1c1c;
+  --bg4:        #262626;
+  --accent:     #4361ee;
+  --text:       #f0f0f0;
+  --text-muted: #888888;
+  --text-dim:   #3a3a3a;
+  --border:     #2a2a2a;
+  --danger:     #ff4444;
+  --success:    #00cc88;
+
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.18s, color 0.18s;
+}
+
+/* ── LIGHT MODE ─────────────────────────── */
+body.light-mode {
+  --bg:         #ffffff;
+  --bg2:        #f7f7f7;
+  --bg3:        #efefef;
+  --bg4:        #e4e4e4;
+  --accent:     #4361ee;
+  --text:       #0a0a0a;
+  --text-muted: #555555;
+  --text-dim:   #c0c0c0;
+  --border:     #e0e0e0;
+  --danger:     #cc0000;
+  --success:    #008855;
+}
+
+/* ── HEADER ─────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.header-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+.header-text h2 {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.4px;
+  line-height: 1.1;
+}
+.header-text .tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.header-text .version {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* ── THEME TOGGLE ───────────────────────── */
+.theme-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.theme-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.toggle-track.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: left 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+.toggle-track.on .toggle-thumb {
+  left: 21px;
+}
+
+/* ── SITE STATUS ────────────────────────── */
+.site-status {
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+.site-active {
+  background: rgba(0,204,136,0.07);
+  border-color: rgba(0,204,136,0.3);
+  color: var(--success);
+}
+.site-skipped {
+  background: rgba(255,68,68,0.07);
+  border-color: rgba(255,68,68,0.3);
+  color: var(--danger);
+}
+
+/* ── CURRENT SITE BUTTON ────────────────── */
+.current-site-btn {
+  width: 100%;
+  padding: 9px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  font-family: inherit;
+  transition: filter 0.15s;
+}
+.btn-disable { background: var(--danger);  color: #fff; }
+.btn-enable  { background: var(--success); color: #fff; }
+.btn-disable:hover,
+.btn-enable:hover { filter: brightness(1.15); }
+
+/* ── DIVIDER ────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* ── SECTION CARD ───────────────────────── */
+.section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+/* ── FEATURE ROWS ───────────────────────── */
+.feature-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+.feature-row:last-child { border-bottom: none; }
+.feature-info           { flex: 1; padding-right: 12px; }
+.feature-label {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+.feature-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+/* ── KEYBOARD SHORTCUTS ─────────────────── */
+.shortcut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.shortcut:last-child { border-bottom: none; }
+.shortcut-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.shortcut-keys {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+kbd {
+  background: var(--bg3);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 10px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ── SKIP-LIST SECTION ──────────────────── */
+.skip-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.skip-input {
+  flex: 1;
+  padding: 7px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.skip-input:focus        { border-color: var(--accent); }
+.skip-input::placeholder { color: var(--text-dim); }
+
+.add-btn {
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: filter 0.15s;
+}
+.add-btn:hover { filter: brightness(1.15); }
+
+.skip-list {
+  max-height: 130px;
+  overflow-y: auto;
+}
+.skip-list::-webkit-scrollbar       { width: 3px; }
+.skip-list::-webkit-scrollbar-track { background: transparent; }
+.skip-list::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.skip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  margin: 2px 0;
+  background: var(--bg3);
+  border-radius: 4px;
+}
+.skip-item-name {
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  font-family: inherit;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+.remove-btn:hover { filter: brightness(1.3); }
+
+/* ── SUPPORT FOOTER ─────────────────────── */
+.support-section {
+  text-align: center;
+  padding: 4px 0 2px;
+}
+.support-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.patreon-btn {
+  display: inline-block;
+  padding: 9px 22px;
+  background: #FF424D;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: filter 0.15s;
+}
+.patreon-btn:hover { filter: brightness(1.12); }
+.opensource-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <img class="header-logo" src="repage.png" alt="RePage logo"
+         onerror="this.style.display='none'">
+    <div class="header-text">
+      <h2>RePage</h2>
+      <div class="tagline">Unscroll the internet.</div>
+      <div class="version">v4.0 · Free &amp; open source</div>
+    </div>
+  </div>
+  <div class="theme-wrap" id="theme-wrap" title="Toggle dark / light mode">
+    <div class="toggle-track on" id="theme-track">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="theme-label" id="theme-label">Dark</span>
+  </div>
+</div>
+
+<!-- SITE STATUS -->
+<div id="site-status" class="site-status site-active">Checking…</div>
+<button id="toggle-site-btn" class="current-site-btn btn-disable"
+        style="display:none">Loading…</button>
+
+<hr class="divider">
+
+<!-- FEATURES -->
+<div class="section" id="features-section">
+  <div class="section-title">Features</div>
+
+  <div class="feature-row">
+    <div class="feature-info">
+      <div class="feature-label">🔕 Mute Notifications</div>
+      <div class="feature-desc">Hides unread badges and notification counts.</div>
+    </div>
+    <div class="toggle-track" id="toggle-muteNotifs" data-key="muteNotifs">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-info">
+      <div class="feature-label">👁 Hide Like Counts</div>
+      <div class="feature-desc">Removes likes, hearts, upvotes and reactions.</div>
+    </div>
+    <div class="toggle-track" id="toggle-hideLikes" data-key="hideLikes">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-info">
+      <div class="feature-label">🎨 Greyscale Filter</div>
+      <div class="feature-desc">Renders the entire page in black &amp; white.</div>
+    </div>
+    <div class="toggle-track" id="toggle-greyscale" data-key="greyscale">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-info">
+      <div class="feature-label">📝 Text-Only Posts</div>
+      <div class="feature-desc">Hides all photos &amp; videos in social feeds.</div>
+    </div>
+    <div class="toggle-track" id="toggle-textOnly" data-key="textOnly">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-info">
+      <div class="feature-label">⏸ Disable Autoplay</div>
+      <div class="feature-desc">Pauses all videos automatically on page load.</div>
+    </div>
+    <div class="toggle-track" id="toggle-noAutoplay" data-key="noAutoplay">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+</div>
+
+<!-- KEYBOARD SHORTCUTS -->
+<div class="section">
+  <div class="section-title">Navigation Shortcuts</div>
+  <div class="shortcut">
+    <span class="shortcut-label">Next page</span>
+    <span class="shortcut-keys">
+      <kbd>X</kbd><kbd>→</kbd><kbd>Space</kbd><kbd>PgDn</kbd>
+    </span>
+  </div>
+  <div class="shortcut">
+    <span class="shortcut-label">Previous page</span>
+    <span class="shortcut-keys">
+      <kbd>Z</kbd><kbd>←</kbd><kbd>PgUp</kbd>
+    </span>
+  </div>
+  <div class="shortcut">
+    <span class="shortcut-label">First / Last page</span>
+    <span class="shortcut-keys">
+      <kbd>Home</kbd><kbd>End</kbd>
+    </span>
+  </div>
+</div>
+
+<!-- DISABLED SITES -->
+<div class="section">
+  <div class="section-title">Disabled Sites</div>
+  <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">
+    RePage will not run on these domains.
+  </p>
+  <div class="skip-input-row">
+    <input type="text" id="add-site-input"
+           class="skip-input" placeholder="example.com">
+    <button id="add-site-btn" class="add-btn">Add</button>
+  </div>
+  <div id="skip-list" class="skip-list"></div>
+</div>
+
+<hr class="divider">
+
+<!-- SUPPORT -->
+<div class="support-section">
+  <div class="support-text">
+    RePage is free forever. If it saves you time,<br>
+    consider supporting development.
+  </div>
+  <a href="https://www.patreon.com/joshforall"
+     target="_blank" class="patreon-btn">♥ Support on Patreon</a>
+  <div class="opensource-note">
+    Open source · No tracking · No ads · No data collection
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
