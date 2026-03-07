@@ -7,3 +7,9 @@ https://phys.org/news/2026-02-social-media-addictive-clicking.html#:~:text=Featu
 https://adrianroselli.com/2015/05/for-infinite-scroll-bounce-rate-is.html#:~:text=Since%20its%20March%20redesign%2C%20Time,without%20the%20option%20to%20scroll.%E2%80%9D
 https://research-portal.uu.nl/ws/portalfiles/portal/241165421/3648188.3675148.pdf
 https://www.uu.nl/en/news/researchers-advise-the-house-of-representatives-education-needed-on-safe-screen-use-for-children
+
+SETUP
+Turn on developer mode in Chrome extensions page (top right corner toggle)
+"Load unpacked" button in top left corner
+Load this folder
+Toggle settings in extension pop-up menu!
