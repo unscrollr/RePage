@@ -434,6 +434,17 @@
   // SUB-SCROLL CONTAINER PAGINATION
   // =============================================
   function findSubScrollContainers() {
+  function shouldSkipEl(el) {
+    var role = (el.getAttribute("role") || "").toLowerCase();
+    if (/^(dialog|listbox|combobox|menu|navigation)$/.test(role)) return true;
+    if (el.getAttribute("aria-autocomplete")) return true;
+    var tid = el.getAttribute("data-testid") || "";
+    if (/dropdown/i.test(tid)) return true;
+    if (el.closest("form")) return true;
+    var cls = (el.className || "").toLowerCase();
+    if (/dropdown|autocomplete|menu|modal|tooltip|popup/.test(cls)) return true;
+    return false;
+  }
     var registeredEls = [];
     for (var r = 0; r < subScrollers.length; r++) {
       registeredEls.push(subScrollers[r].el);
@@ -736,6 +747,7 @@
       var ov = cs.overflowY || cs.overflow;
       if (el.scrollHeight > el.clientHeight ||
           ov === "auto" || ov === "scroll" || ov === "overlay") {
+        if (shouldSkipEl(el)) { continue; }
         return el;
       }
     }
