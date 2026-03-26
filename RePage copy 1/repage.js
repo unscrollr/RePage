@@ -53,7 +53,8 @@
         "main[role='main']",
         "section main",
         "main"
-      ]
+      ],
+      useBodyScroll: true  // Instagram uses document.body as scroll container
     }
   ];
 
@@ -628,6 +629,20 @@
 
   function findInnerScrollContainer() {
     if (!innerScrollConfig) { return null; }
+
+    // Instagram: the feed lives inside a position:relative flex div
+    // with a large padding-bottom, direct parent of <article> elements.
+    // document.body is the actual scroll container on Instagram.
+    if (innerScrollConfig.name === "instagram") {
+      var padded = document.querySelectorAll('[style*="padding-bottom"]');
+      for (var j = 0; j < padded.length; j++) {
+        var cs = window.getComputedStyle(padded[j]);
+        if (cs.display === "flex" && padded[j].querySelector("article")) {
+          return padded[j];
+        }
+      }
+    }
+
     var selectors = innerScrollConfig.selectors || [];
     for (var i = 0; i < selectors.length; i++) {
       var el;
@@ -635,6 +650,14 @@
       if (!el) { continue; }
       if (el.scrollHeight > window.innerHeight * 0.5) { return el; }
     }
+
+    // Body-scroll fallback: if the config declares body as scroll container
+    // and body has overflowing content, use document.body directly.
+    if (innerScrollConfig.useBodyScroll &&
+        document.body.scrollHeight > window.innerHeight) {
+      return document.body;
+    }
+
     return findTallestScrollable();
   }
 
@@ -659,9 +682,13 @@
     if (maxOffset < 0)      { maxOffset = 0; }
     if (offset > maxOffset) { offset    = maxOffset; }
 
-    // Set scrollTop directly — avoids triggering Instagram's
-    // scroll-event debounce while still moving the container
-    innerScrollEl.scrollTop = offset;
+    // Use scrollTo() on document.body (confirmed working on Instagram).
+    // For other inner-scroll containers, set scrollTop directly.
+    if (innerScrollEl === document.body) {
+      document.body.scrollTo(0, offset);
+    } else {
+      innerScrollEl.scrollTop = offset;
+    }
 
     // Re-fire a scroll event so Instagram's IntersectionObserver
     // re-evaluates the loading spinner visibility
@@ -1750,10 +1777,12 @@
 
     if (isInnerScroll) {
       // ── Instagram / inner-scroll mode ───────────
-      // Lock the window but leave the feed container
-      // free so IntersectionObserver still fires.
+      // Lock the document root. For body-scroll sites (Instagram),
+      // keep document.body scrollable — it IS the scroll container.
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow            = "hidden";
+      if (!innerScrollConfig || !innerScrollConfig.useBodyScroll) {
+        document.body.style.overflow = "hidden";
+      }
 
       innerScrollEl = findInnerScrollContainer();
 
