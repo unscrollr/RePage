@@ -1874,5 +1874,23 @@
   injectGlobalCSS();
   checkAndStart();
 
+
+  // =============================================
+  // SPA ROUTE CHANGE DETECTION
+  // =============================================
+  (function () {
+    function onNav() {
+      setTimeout(function () {
+        if (typeof reInit === "function") { reInit(); }
+      }, 500);
+    }
+    var _push = history.pushState.bind(history);
+    var _replace = history.replaceState.bind(history);
+    history.pushState = function () { _push.apply(history, arguments); onNav(); };
+    history.replaceState = function () { _replace.apply(history, arguments); onNav(); };
+    window.addEventListener("popstate", onNav);
+    window.addEventListener("hashchange", onNav);
+  }());
+
 })();
   
