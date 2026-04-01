@@ -1758,20 +1758,17 @@
       innerScrollEl = findInnerScrollContainer();
 
       if (!innerScrollEl) {
-        var isRetries = 0;
-        var isTimer   = setInterval(function () {
+        var isMO = new MutationObserver(function () {
           innerScrollEl = findInnerScrollContainer();
-          isRetries++;
-          if (innerScrollEl || isRetries >= 20) {
-            clearInterval(isTimer);
-            if (innerScrollEl) {
-              watchInnerScrollContainer();
-              calculateInnerScrollPages();
-              buildBar();
-              goToPageInner(1);
-            }
+          if (innerScrollEl) {
+            isMO.disconnect();
+            watchInnerScrollContainer();
+            calculateInnerScrollPages();
+            buildBar();
+            goToPageInner(1);
           }
-        }, 500);
+        });
+        isMO.observe(document.body, { childList: true, subtree: true });
       } else {
         watchInnerScrollContainer();
         calculatePages();
