@@ -5,7 +5,7 @@
   // CONFIGURATION
   // =============================================
   var BASE_BAR_HEIGHT = 48;
-  var CHECK_INTERVAL  = 2000;
+  var CHECK_INTERVAL = 2000;
   var FIXED_RESCAN_MS = 500;
 
   // =============================================
@@ -22,21 +22,13 @@
     "maps.google.com",
     "figma.com",
     "codepen.io",
-    "codesandbox.io"
+    "codesandbox.io",
   ];
 
   // =============================================
   // GENTLE MODE SITES
   // =============================================
-  var GENTLE_SITES = [
-    "youtube.com",
-    "facebook.com",
-    "twitter.com",
-    "x.com",
-    "reddit.com",
-    "tiktok.com",
-    "linkedin.com"
-  ];
+  var GENTLE_SITES = ["twitter.com", "x.com", "reddit.com", "tiktok.com"];
 
   // =============================================
   // INNER-SCROLL SITES
@@ -49,256 +41,320 @@
     {
       host: "instagram.com",
       name: "instagram",
+      // bodyScroll: Instagram's real scroll container is document.body
+      bodyScroll: true,
+      selectors: ["main[role='main']", "section main", "main"],
+    },
+    {
+      host: "youtube.com",
+      name: "youtube",
+      selectors: ["ytd-app", "#page-manager", "ytd-browse"],
+    },
+    {
+      host: "facebook.com",
+      name: "facebook",
       selectors: [
-        "main[role='main']",
-        "section main",
-        "main"
-      ]
-    }
+        "[role='feed']",
+        "div[data-pagelet='FeedUnit_0']",
+        "[role='main']",
+      ],
+    },
+    {
+      host: "linkedin.com",
+      name: "linkedin",
+      selectors: [
+        ".scaffold-finite-scroll__content",
+        "[data-finite-scroll-hotspot]",
+        "main",
+      ],
+    },
   ];
 
   // =============================================
   // SOCIAL SITES
   // =============================================
   var SOCIAL_SITES = [
-    "instagram.com", "facebook.com", "twitter.com",
-    "x.com", "reddit.com", "tiktok.com", "linkedin.com",
-    "pinterest.com", "tumblr.com", "snapchat.com"
+    "instagram.com",
+    "facebook.com",
+    "twitter.com",
+    "x.com",
+    "reddit.com",
+    "tiktok.com",
+    "linkedin.com",
+    "pinterest.com",
+    "tumblr.com",
+    "snapchat.com",
   ];
 
   // =============================================
   // AI CHAT SITES
   // =============================================
   var AI_CHAT_SITES = [
-    { host: "chat.openai.com",       name: "chatgpt"    },
-    { host: "chatgpt.com",           name: "chatgpt"    },
-    { host: "claude.ai",             name: "claude"     },
-    { host: "gemini.google.com",     name: "gemini"     },
-    { host: "bard.google.com",       name: "gemini"     },
-    { host: "perplexity.ai",         name: "perplexity" },
-    { host: "copilot.microsoft.com", name: "copilot"    },
-    { host: "you.com",               name: "you"        },
-    { host: "poe.com",               name: "poe"        },
-    { host: "mistral.ai",            name: "mistral"    },
-    { host: "character.ai",          name: "character"  },
-    { host: "huggingface.co",        name: "hf"         }
+    { host: "chat.openai.com", name: "chatgpt" },
+    { host: "chatgpt.com", name: "chatgpt" },
+    { host: "claude.ai", name: "claude" },
+    { host: "gemini.google.com", name: "gemini" },
+    { host: "bard.google.com", name: "gemini" },
+    { host: "perplexity.ai", name: "perplexity" },
+    { host: "copilot.microsoft.com", name: "copilot" },
+    { host: "you.com", name: "you" },
+    { host: "poe.com", name: "poe" },
+    { host: "mistral.ai", name: "mistral" },
+    { host: "character.ai", name: "character" },
+    { host: "huggingface.co", name: "hf" },
   ];
 
   var AI_SCROLL_SELECTORS = {
-    chatgpt:    [
+    chatgpt: [
+      "#thread",
       "div[class*='react-scroll-to-bottom']",
       "main .overflow-y-auto",
-      "div[class*='overflow-y-auto']"
+      "div[class*='overflow-y-auto']",
     ],
-    claude:     [
+    claude: [
       "div[class*='overflow-y-scroll']",
       "main div[class*='scroll']",
-      "div[data-testid='conversation-content']"
+      "div[data-testid='conversation-content']",
     ],
-    gemini:     [
+    gemini: [
+      ".content-container",
       ".conversation-container",
       "infinite-scroller",
-      "chat-history"
+      "chat-history",
     ],
     perplexity: [
       "main div[class*='overflow']",
       ".prose-container",
-      "div[class*='scroll']"
+      "div[class*='scroll']",
     ],
-    copilot:    ["cib-chat-main", "div[class*='scroll']", "main"],
-    you:        ["div[class*='overflow']", "main", "#search-results"],
-    poe:        [
+    copilot: ["cib-chat-main", "div[class*='scroll']", "main"],
+    you: ["div[class*='overflow']", "main", "#search-results"],
+    poe: [
       "div[class*='InfiniteScroll']",
       "div[class*='chatMessage']",
-      "section"
+      "section",
     ],
-    mistral:    [
-      "div[class*='overflow-y']",
-      "main",
-      "div[class*='scroll']"
-    ],
-    character:  [
+    mistral: ["div[class*='overflow-y']", "main", "div[class*='scroll']"],
+    character: [
       "div[class*='chat-messages']",
       "div[class*='overflow']",
-      "main"
+      "main",
     ],
-    hf:         ["div[class*='overflow-y']", "main", ".message-wrap"]
+    hf: ["div[class*='overflow-y']", "main", ".message-wrap"],
   };
 
   // =============================================
   // STATE
   // =============================================
-  var currentPage       = 1;
-  var totalPages        = 1;
-  var stepHeight        = 0;
-  var contentHeight     = 0;
-  var isInitialized     = false;
-  var wrapper           = null;
-  var isGentleMode      = false;
-  var isAIChat          = false;
-  var isInnerScroll     = false;
-  var innerScrollEl     = null;
+  var currentPage = 1;
+  var totalPages = 1;
+  var stepHeight = 0;
+  var contentHeight = 0;
+  var isInitialized = false;
+  var wrapper = null;
+  var isGentleMode = false;
+  var isAIChat = false;
+  var isInnerScroll = false;
+  var innerScrollEl = null;
   var innerScrollConfig = null;
-  var isSocialSite      = false;
-  var aiChatType        = null;
-  var aiScrollEl        = null;
+  var isSocialSite = false;
+  var aiChatType = null;
+  var aiScrollEl = null;
 
-  var activeModal       = null;
-  var modalPage         = 1;
-  var modalTotalPages   = 1;
-  var modalStepHeight   = 0;
+  var activeModal = null;
+  var modalPage = 1;
+  var modalTotalPages = 1;
+  var modalStepHeight = 0;
 
-  var fixedTopOffset    = 0;
+  var fixedTopOffset = 0;
   var fixedBottomOffset = 0;
-  var fixedScanTimer    = null;
+  var fixedScanTimer = null;
 
   // Bar update debounce
-  var barUpdateTimer    = null;
+  var barUpdateTimer = null;
 
   var settings = {
-    darkMode:   true,
+    darkMode: true,
     muteNotifs: false,
-    hideLikes:  false,
-    greyscale:  false,
-    textOnly:   false,
-    noAutoplay: false
+    hideLikes: false,
+    greyscale: false,
+    textOnly: false,
+    noAutoplay: false,
   };
 
   var subScrollers = [];
 
+  // Shadow DOM host for the bar — invisible to page JS queries
+  var shadowHost = null;
+  var shadowRoot = null;
+
   // =============================================
   // THEME HELPERS — pure black / pure white
   // =============================================
-  function barBg()     { return settings.darkMode ? "#0a0a0a" : "#ffffff"; }
-  function barBorder() { return settings.darkMode ? "#2a2a2a" : "#cccccc"; }
-  function btnBg()     { return settings.darkMode ? "#1a1a1a" : "#f0f0f0"; }
-  function btnBgAct()  { return "#4361ee"; }
-  function btnCol()    { return settings.darkMode ? "#e0e0e0" : "#111111"; }
-  function btnColAct() { return "#ffffff"; }
-  function btnBorder() { return settings.darkMode ? "#2a2a2a" : "#dddddd"; }
-  function infoCol()   { return settings.darkMode ? "#666666" : "#888888"; }
-  function dotsCol()   { return settings.darkMode ? "#444444" : "#aaaaaa"; }
-  function hoverBg()   { return settings.darkMode ? "#2a2a3e" : "#e8ecff"; }
+  function barBg() {
+    return settings.darkMode ? "#0a0a0a" : "#ffffff";
+  }
+  function barBorder() {
+    return settings.darkMode ? "#2a2a2a" : "#cccccc";
+  }
+  function btnBg() {
+    return settings.darkMode ? "#1a1a1a" : "#f0f0f0";
+  }
+  function btnBgAct() {
+    return "#4361ee";
+  }
+  function btnCol() {
+    return settings.darkMode ? "#e0e0e0" : "#111111";
+  }
+  function btnColAct() {
+    return "#ffffff";
+  }
+  function btnBorder() {
+    return settings.darkMode ? "#2a2a2a" : "#dddddd";
+  }
+  function infoCol() {
+    return settings.darkMode ? "#666666" : "#888888";
+  }
+  function dotsCol() {
+    return settings.darkMode ? "#444444" : "#aaaaaa";
+  }
+  function hoverBg() {
+    return settings.darkMode ? "#2a2a3e" : "#e8ecff";
+  }
 
   // =============================================
   // SETTINGS: LOAD / APPLY
   // =============================================
   function loadSettings(callback) {
-    chrome.storage.sync.get({
-      darkMode:   true,
-      muteNotifs: false,
-      hideLikes:  false,
-      greyscale:  false,
-      textOnly:   false,
-      noAutoplay: false
-    }, function (stored) {
-      settings = stored;
-      applySettings();
-      if (callback) { callback(); }
-    });
+    chrome.storage.sync.get(
+      {
+        darkMode: true,
+        muteNotifs: false,
+        hideLikes: false,
+        greyscale: false,
+        textOnly: false,
+        noAutoplay: false,
+      },
+      function (stored) {
+        settings = stored;
+        applySettings();
+        if (callback) {
+          callback();
+        }
+      },
+    );
   }
 
   function applySettings() {
+    // Greyscale via direct style — no class mutation on documentElement
     var html = document.documentElement;
-    toggleClass(html, "repage-dark",        settings.darkMode);
-    toggleClass(html, "repage-light",       !settings.darkMode);
-    toggleClass(html, "repage-greyscale",   settings.greyscale);
-    toggleClass(html, "repage-hide-likes",  settings.hideLikes);
-    toggleClass(html, "repage-mute-notifs", settings.muteNotifs);
-    toggleClass(html, "repage-text-only",   settings.textOnly && isSocialSite);
+    if (settings.greyscale) {
+      html.style.setProperty("filter", "grayscale(100%)", "important");
+    } else {
+      html.style.removeProperty("filter");
+    }
 
-    if (settings.hideLikes)                { injectSiteLikeHideCSS(); }
-    if (settings.muteNotifs)               { injectSiteMuteCSS(); }
-    if (settings.textOnly && isSocialSite) { injectTextOnlyCSS(); }
-    if (settings.noAutoplay)               { disableAutoplay(); }
+    if (settings.hideLikes) {
+      injectSiteLikeHideCSS();
+    }
+    if (settings.muteNotifs) {
+      injectSiteMuteCSS();
+    }
+    if (settings.textOnly && isSocialSite) {
+      injectTextOnlyCSS();
+    }
+    if (settings.noAutoplay) {
+      disableAutoplay();
+    }
 
     // Rebuild bar with new theme colours if already running
-    if (isInitialized) { scheduleBarRebuild(); }
-  }
-
-  function toggleClass(el, cls, on) {
-    if (on) { el.classList.add(cls); }
-    else    { el.classList.remove(cls); }
+    if (isInitialized) {
+      scheduleBarRebuild();
+    }
   }
 
   // =============================================
   // SITE-SPECIFIC CSS INJECTORS
+  // IDs use non-descriptive names to avoid easy detection by site JS.
+  // CSS rules are direct selectors — no html.repage-* class prefix.
   // =============================================
   function injectSiteLikeHideCSS() {
-    if (document.getElementById("repage-like-css")) { return; }
+    if (document.getElementById("_rp_lk")) {
+      return;
+    }
     var s = document.createElement("style");
-    s.id  = "repage-like-css";
+    s.id = "_rp_lk";
     s.textContent = [
-      'html.repage-hide-likes [data-testid="like"]',
-      '  span[data-testid="app-text-transition-container"],',
-      'html.repage-hide-likes [data-testid="unlike"]',
-      '  span[data-testid="app-text-transition-container"],',
-      'html.repage-hide-likes [id^="vote-arrows"] .score,',
-      'html.repage-hide-likes shreddit-post [score],',
-      'html.repage-hide-likes section span[class*="like"],',
-      'html.repage-hide-likes [aria-label*="reactions" i],',
-      'html.repage-hide-likes .social-details-social-counts__reactions',
-      '{ visibility:hidden !important;',
-      '  width:0 !important;',
-      '  overflow:hidden !important; }'
+      '[data-testid="like"] span[data-testid="app-text-transition-container"],',
+      '[data-testid="unlike"] span[data-testid="app-text-transition-container"],',
+      '[id^="vote-arrows"] .score,',
+      "shreddit-post [score],",
+      'section span[class*="like"],',
+      "[aria-label*='reactions' i],",
+      ".social-details-social-counts__reactions",
+      "{ visibility:hidden !important; width:0 !important; overflow:hidden !important; }",
     ].join("\n");
     (document.head || document.documentElement).appendChild(s);
   }
 
   function injectSiteMuteCSS() {
-    if (document.getElementById("repage-mute-css")) { return; }
+    if (document.getElementById("_rp_mn")) {
+      return;
+    }
     var s = document.createElement("style");
-    s.id  = "repage-mute-css";
+    s.id = "_rp_mn";
     s.textContent = [
-      'html.repage-mute-notifs [data-testid="notifBadge"],',
-      'html.repage-mute-notifs [class*="jewel" i],',
-      'html.repage-mute-notifs [class*="inbox-count" i],',
-      'html.repage-mute-notifs yt-icon-badge-shape,',
-      'html.repage-mute-notifs .ytd-notification-topbar-button-renderer',
-      '{ display:none !important; }'
+      '[data-testid="notifBadge"],',
+      '[class*="jewel" i],',
+      '[class*="inbox-count" i],',
+      "yt-icon-badge-shape,",
+      ".ytd-notification-topbar-button-renderer",
+      "{ display:none !important; }",
     ].join("\n");
     (document.head || document.documentElement).appendChild(s);
   }
 
   function injectTextOnlyCSS() {
-    if (document.getElementById("repage-textonly-css")) { return; }
+    if (document.getElementById("_rp_to")) {
+      return;
+    }
     var s = document.createElement("style");
-    s.id  = "repage-textonly-css";
+    s.id = "_rp_to";
     s.textContent = [
-      /* LinkedIn — collapse layout completely */
-      'html.repage-text-only .update-components-image,',
-      'html.repage-text-only .update-components-image__image-link,',
-      'html.repage-text-only .feed-shared-image,',
-      'html.repage-text-only .feed-shared-image__container,',
-      'html.repage-text-only .update-components-linkedin-video,',
-      'html.repage-text-only .update-components-linkedin-video__content,',
-      'html.repage-text-only .feed-shared-linkedin-video,',
-      'html.repage-text-only [class*="update-components-image"],',
-      'html.repage-text-only [class*="feed-shared-image"],',
-      'html.repage-text-only [class*="update-components-linkedin-video"],',
-      'html.repage-text-only .update-components-document,',
+      /* LinkedIn */
+      ".update-components-image,",
+      ".update-components-image__image-link,",
+      ".feed-shared-image,",
+      ".feed-shared-image__container,",
+      ".update-components-linkedin-video,",
+      ".update-components-linkedin-video__content,",
+      ".feed-shared-linkedin-video,",
+      '[class*="update-components-image"],',
+      '[class*="feed-shared-image"],',
+      '[class*="update-components-linkedin-video"],',
+      ".update-components-document,",
       /* Twitter/X */
-      'html.repage-text-only [data-testid="tweetPhoto"],',
-      'html.repage-text-only [data-testid="videoComponent"],',
+      '[data-testid="tweetPhoto"],',
+      '[data-testid="videoComponent"],',
       /* Instagram */
-      'html.repage-text-only article img,',
-      'html.repage-text-only article video,',
+      "article img,",
+      "article video,",
       /* Reddit */
-      'html.repage-text-only [class*="media-element"],',
-      'html.repage-text-only shreddit-player,',
+      '[class*="media-element"],',
+      "shreddit-player,",
       /* Generic */
-      'html.repage-text-only video,',
-      'html.repage-text-only iframe[src*="youtube"],',
-      'html.repage-text-only iframe[src*="vimeo"]',
-      '{',
-      '  display:none !important;',
-      '  width:0 !important;',
-      '  height:0 !important;',
-      '  overflow:hidden !important;',
-      '  margin:0 !important;',
-      '  padding:0 !important;',
-      '  border:none !important;',
-      '}'
+      "video,",
+      'iframe[src*="youtube"],',
+      'iframe[src*="vimeo"]',
+      "{",
+      "  display:none !important;",
+      "  width:0 !important;",
+      "  height:0 !important;",
+      "  overflow:hidden !important;",
+      "  margin:0 !important;",
+      "  padding:0 !important;",
+      "  border:none !important;",
+      "}",
     ].join("\n");
     (document.head || document.documentElement).appendChild(s);
   }
@@ -308,13 +364,19 @@
   // =============================================
   function disableAutoplay() {
     function processVideo(v) {
-      if (!v) { return; }
+      if (!v) {
+        return;
+      }
       v.autoplay = false;
       v.removeAttribute("autoplay");
-      try { v.pause(); } catch (e) { }
+      try {
+        v.pause();
+      } catch (e) {}
     }
     var vids = document.querySelectorAll("video");
-    for (var i = 0; i < vids.length; i++) { processVideo(vids[i]); }
+    for (var i = 0; i < vids.length; i++) {
+      processVideo(vids[i]);
+    }
 
     if (!window.__repageAutoplayObs) {
       window.__repageAutoplayObs = new MutationObserver(function (muts) {
@@ -322,19 +384,23 @@
           var added = muts[m].addedNodes;
           for (var n = 0; n < added.length; n++) {
             var node = added[n];
-            if (node.nodeType !== 1) { continue; }
+            if (node.nodeType !== 1) {
+              continue;
+            }
             if (node.tagName === "VIDEO") {
               processVideo(node);
             } else if (node.querySelectorAll) {
               var vs = node.querySelectorAll("video");
-              for (var v = 0; v < vs.length; v++) { processVideo(vs[v]); }
+              for (var v = 0; v < vs.length; v++) {
+                processVideo(vs[v]);
+              }
             }
           }
         }
       });
       window.__repageAutoplayObs.observe(document.documentElement, {
         childList: true,
-        subtree:   true
+        subtree: true,
       });
     }
   }
@@ -343,54 +409,84 @@
   // MEASURE FIXED ELEMENTS
   // =============================================
   function measureFixedElements() {
-    var topMax = 0, bottomMax = 0;
-    var vh = window.innerHeight, vw = window.innerWidth;
-    var ownIds = ["repage-bar", "repage-wrapper", "repage-modal-bar"];
+    var topMax = 0,
+      bottomMax = 0;
+    var vh = window.innerHeight,
+      vw = window.innerWidth;
+    var ownIds = ["repage-wrapper", "repage-modal-bar"];
     var all = document.querySelectorAll("*");
 
     for (var i = 0; i < all.length; i++) {
-      var el   = all[i];
+      var el = all[i];
       var elId = el.id || "";
       var skip = false;
       for (var k = 0; k < ownIds.length; k++) {
-        if (elId === ownIds[k]) { skip = true; break; }
+        if (elId === ownIds[k]) {
+          skip = true;
+          break;
+        }
       }
-      if (skip) { continue; }
+      if (skip) {
+        continue;
+      }
+      if (el === shadowHost) {
+        continue;
+      }
 
       var cs;
-      try { cs = window.getComputedStyle(el); } catch (e) { continue; }
-      if (cs.position !== "fixed" && cs.position !== "sticky") { continue; }
-      if (cs.display === "none" || cs.visibility === "hidden")  { continue; }
-      if (parseFloat(cs.opacity) < 0.05)                        { continue; }
+      try {
+        cs = window.getComputedStyle(el);
+      } catch (e) {
+        continue;
+      }
+      if (cs.position !== "fixed" && cs.position !== "sticky") {
+        continue;
+      }
+      if (cs.display === "none" || cs.visibility === "hidden") {
+        continue;
+      }
+      if (parseFloat(cs.opacity) < 0.05) {
+        continue;
+      }
 
       var rect = el.getBoundingClientRect();
-      if (rect.width  < vw * 0.30) { continue; }
-      if (rect.height < 10)        { continue; }
+      if (rect.width < vw * 0.3) {
+        continue;
+      }
+      if (rect.height < 10) {
+        continue;
+      }
 
-      if (rect.top < vh * 0.40 && rect.bottom <= vh * 0.55) {
-        if (rect.bottom > topMax) { topMax = rect.bottom; }
+      if (rect.top < vh * 0.4 && rect.bottom <= vh * 0.55) {
+        if (rect.bottom > topMax) {
+          topMax = rect.bottom;
+        }
       }
       if (rect.top >= vh * 0.55) {
         var fb = vh - rect.top;
-        if (fb > bottomMax) { bottomMax = fb; }
+        if (fb > bottomMax) {
+          bottomMax = fb;
+        }
       }
     }
 
-    fixedTopOffset    = topMax    > 0 ? topMax    + 4 : 0;
+    fixedTopOffset = topMax > 0 ? topMax + 4 : 0;
     fixedBottomOffset = bottomMax > 0 ? bottomMax + 4 : 0;
   }
 
   function getEffectiveStepHeight() {
-    var a = window.innerHeight
-          - BASE_BAR_HEIGHT
-          - fixedTopOffset
-          - fixedBottomOffset;
-    if (a < 100) { a = 100; }
+    var a =
+      window.innerHeight - BASE_BAR_HEIGHT - fixedTopOffset - fixedBottomOffset;
+    if (a < 100) {
+      a = 100;
+    }
     return Math.floor(a);
   }
 
   function scheduleFixedScan() {
-    if (fixedScanTimer) { clearTimeout(fixedScanTimer); }
+    if (fixedScanTimer) {
+      clearTimeout(fixedScanTimer);
+    }
     fixedScanTimer = setTimeout(function () {
       measureFixedElements();
       calculatePages();
@@ -423,7 +519,9 @@
   }
 
   function scheduleBarPatch() {
-    if (barUpdateTimer) { cancelAnimationFrame(barUpdateTimer); }
+    if (barUpdateTimer) {
+      cancelAnimationFrame(barUpdateTimer);
+    }
     barUpdateTimer = requestAnimationFrame(function () {
       barUpdateTimer = null;
       patchBarInPlace();
@@ -433,6 +531,17 @@
   // =============================================
   // SUB-SCROLL CONTAINER PAGINATION
   // =============================================
+  // Roles/attributes that identify transient UI — never paginate these
+  var SUB_SKIP_ROLES = [
+    "dialog",
+    "listbox",
+    "menu",
+    "tooltip",
+    "combobox",
+    "alertdialog",
+    "option",
+  ];
+
   function findSubScrollContainers() {
     var registeredEls = [];
     for (var r = 0; r < subScrollers.length; r++) {
@@ -440,81 +549,166 @@
     }
 
     var candidates = document.querySelectorAll(
-      "div, section, aside, article, nav, ul, ol, main"
+      "div, section, aside, article, nav, ul, ol, main",
     );
 
     for (var i = 0; i < candidates.length; i++) {
-      var el   = candidates[i];
-      var elId = el.id || "";
+      var el = candidates[i];
 
-      if (elId.indexOf("repage") === 0)                { continue; }
-      if (el.closest && el.closest("#repage-bar"))     { continue; }
-      if (el.closest && el.closest("#repage-modal-bar")){ continue; }
-      if (isAIChat     && el === aiScrollEl)           { continue; }
-      if (isInnerScroll && el === innerScrollEl)       { continue; }
+      // Skip our own shadow host and modal bar
+      if (el === shadowHost) {
+        continue;
+      }
+      if (el._rpSub) {
+        continue;
+      }
+      if (el.id === "repage-modal-bar") {
+        continue;
+      }
+
+      // Skip transient UI (dialogs, menus, dropdowns, autocomplete)
+      var role = el.getAttribute("role") || "";
+      var skipRole = false;
+      for (var sr = 0; sr < SUB_SKIP_ROLES.length; sr++) {
+        if (role === SUB_SKIP_ROLES[sr]) {
+          skipRole = true;
+          break;
+        }
+      }
+      if (skipRole) {
+        continue;
+      }
+      if (el.getAttribute("aria-haspopup")) {
+        continue;
+      }
+      if (
+        el.closest &&
+        el.closest(
+          "[role='dialog'],[role='menu'],[role='listbox'],[role='combobox']",
+        )
+      ) {
+        continue;
+      }
+
+      if (isAIChat && el === aiScrollEl) {
+        continue;
+      }
+      if (isInnerScroll && el === innerScrollEl) {
+        continue;
+      }
 
       var alreadyDone = false;
       for (var j = 0; j < registeredEls.length; j++) {
-        if (registeredEls[j] === el) { alreadyDone = true; break; }
+        if (registeredEls[j] === el) {
+          alreadyDone = true;
+          break;
+        }
       }
-      if (alreadyDone) { continue; }
+      if (alreadyDone) {
+        continue;
+      }
 
-      if (el.scrollHeight <= el.clientHeight + 10) { continue; }
+      if (el.scrollHeight <= el.clientHeight + 10) {
+        continue;
+      }
 
       var cs;
-      try { cs = window.getComputedStyle(el); } catch (e) { continue; }
+      try {
+        cs = window.getComputedStyle(el);
+      } catch (e) {
+        continue;
+      }
       var ov = cs.overflowY || cs.overflow;
-      if (ov !== "auto" && ov !== "scroll" && ov !== "overlay") { continue; }
+      if (ov !== "auto" && ov !== "scroll" && ov !== "overlay") {
+        continue;
+      }
+
+      // Skip fixed-position overlays (likely modals/tooltips)
+      if (cs.position === "fixed" || cs.position === "sticky") {
+        continue;
+      }
 
       var rect = el.getBoundingClientRect();
-      if (rect.width  < 80) { continue; }
-      if (rect.height < 80) { continue; }
-      if (rect.height > window.innerHeight * 0.85) { continue; }
+      if (rect.width < 80) {
+        continue;
+      }
+      if (rect.height < 100) {
+        continue;
+      }
+      if (rect.height > window.innerHeight * 0.85) {
+        continue;
+      }
 
       attachSubScroller(el);
     }
   }
 
   function attachSubScroller(el) {
-    el.classList.add("repage-subpaged");
+    // Mark with JS property — no class added to avoid detection
+    el._rpSub = true;
+    el.style.setProperty("overflow", "hidden", "important");
+    el.style.setProperty("scrollbar-width", "none", "important");
 
     var state = { el: el, page: 1, totalPages: 1, stepH: 0, bar: null };
 
     function recalc() {
       state.stepH = el.clientHeight;
-      if (state.stepH < 1) { state.stepH = 100; }
-      state.totalPages = (el.scrollHeight <= state.stepH + 2)
-        ? 1
-        : Math.max(1, Math.ceil(el.scrollHeight / state.stepH));
-      if (state.page > state.totalPages) { state.page = state.totalPages; }
+      if (state.stepH < 1) {
+        state.stepH = 100;
+      }
+      state.totalPages =
+        el.scrollHeight <= state.stepH + 2
+          ? 1
+          : Math.max(1, Math.ceil(el.scrollHeight / state.stepH));
+      if (state.page > state.totalPages) {
+        state.page = state.totalPages;
+      }
     }
 
     function goTo(p) {
       p = Math.max(1, Math.min(p, state.totalPages));
       state.page = p;
-      var offset    = (state.page - 1) * state.stepH;
+      var offset = (state.page - 1) * state.stepH;
       var maxOffset = el.scrollHeight - el.clientHeight;
-      if (maxOffset < 0)      { maxOffset = 0; }
-      if (offset > maxOffset) { offset = maxOffset; }
-      try { el.scrollTo({ top: offset, behavior: "smooth" }); }
-      catch (e2) { el.scrollTop = offset; }
+      if (maxOffset < 0) {
+        maxOffset = 0;
+      }
+      if (offset > maxOffset) {
+        offset = maxOffset;
+      }
+      // Instant switch — no smooth animation
+      el.scrollTop = offset;
       renderSubBar();
     }
 
     function renderSubBar() {
       var bar = state.bar;
-      if (!bar) { return; }
-      while (bar.firstChild) { bar.removeChild(bar.firstChild); }
+      if (!bar) {
+        return;
+      }
+      while (bar.firstChild) {
+        bar.removeChild(bar.firstChild);
+      }
 
-      bar.style.background    = barBg();
+      bar.style.background = barBg();
       bar.style.borderTopColor = barBorder();
 
-      if (state.totalPages <= 1) { bar.style.display = "none"; return; }
+      if (state.totalPages <= 1) {
+        bar.style.display = "none";
+        return;
+      }
       bar.style.display = "flex";
 
-      bar.appendChild(makeSubBtn("‹", state.page > 1, function () {
-        goTo(state.page - 1);
-      }, false));
+      bar.appendChild(
+        makeSubBtn(
+          "‹",
+          state.page > 1,
+          function () {
+            goTo(state.page - 1);
+          },
+          false,
+        ),
+      );
 
       var nums = getPageNumbers(state.page, state.totalPages);
       for (var i = 0; i < nums.length; i++) {
@@ -522,26 +716,44 @@
           var d = document.createElement("span");
           d.textContent = "…";
           d.style.cssText =
-            "color:" + dotsCol() + ";padding:0 3px;font-size:12px;" +
+            "color:" +
+            dotsCol() +
+            ";padding:0 3px;font-size:12px;" +
             "display:flex;align-items:center;";
           bar.appendChild(d);
         } else {
           (function (pn) {
-            bar.appendChild(makeSubBtn(String(pn), true, function () {
-              goTo(pn);
-            }, pn === state.page));
+            bar.appendChild(
+              makeSubBtn(
+                String(pn),
+                true,
+                function () {
+                  goTo(pn);
+                },
+                pn === state.page,
+              ),
+            );
           })(nums[i]);
         }
       }
 
-      bar.appendChild(makeSubBtn("›", state.page < state.totalPages, function () {
-        goTo(state.page + 1);
-      }, false));
+      bar.appendChild(
+        makeSubBtn(
+          "›",
+          state.page < state.totalPages,
+          function () {
+            goTo(state.page + 1);
+          },
+          false,
+        ),
+      );
 
       var info = document.createElement("span");
       info.textContent = state.page + "/" + state.totalPages;
       info.style.cssText =
-        "color:" + infoCol() + ";font-size:10px;display:flex;" +
+        "color:" +
+        infoCol() +
+        ";font-size:10px;display:flex;" +
         "align-items:center;padding:0 6px;white-space:nowrap;";
       bar.appendChild(info);
     }
@@ -550,18 +762,29 @@
     bar.style.cssText =
       "position:sticky;bottom:0;left:0;width:100%;height:32px;" +
       "display:flex;flex-direction:row;justify-content:center;" +
-      "align-items:stretch;background:" + barBg() + ";" +
-      "border-top:1px solid " + barBorder() + ";" +
+      "align-items:stretch;background:" +
+      barBg() +
+      ";" +
+      "border-top:1px solid " +
+      barBorder() +
+      ";" +
       "z-index:2147483646;pointer-events:auto;gap:0;flex-shrink:0;";
     state.bar = bar;
     el.appendChild(bar);
 
-    el.addEventListener("wheel", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.deltaY > 0) { goTo(state.page + 1); }
-      else              { goTo(state.page - 1); }
-    }, { passive: false, capture: true });
+    el.addEventListener(
+      "wheel",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY > 0) {
+          goTo(state.page + 1);
+        } else {
+          goTo(state.page - 1);
+        }
+      },
+      { passive: false, capture: true },
+    );
 
     if (typeof ResizeObserver !== "undefined") {
       new ResizeObserver(function () {
@@ -581,12 +804,24 @@
     btn.style.cssText =
       "display:flex;align-items:center;justify-content:center;" +
       "height:100%;padding:0 8px;border:none;" +
-      "border-right:1px solid " + btnBorder() + ";" +
-      "background:" + (isActive ? btnBgAct() : btnBg()) + ";" +
-      "color:" + (isActive ? btnColAct() : btnCol()) + ";" +
-      "font-size:13px;font-weight:" + (isActive ? "700" : "500") + ";" +
-      "cursor:" + (enabled ? "pointer" : "not-allowed") + ";" +
-      "opacity:" + (enabled ? "1" : "0.35") + ";" +
+      "border-right:1px solid " +
+      btnBorder() +
+      ";" +
+      "background:" +
+      (isActive ? btnBgAct() : btnBg()) +
+      ";" +
+      "color:" +
+      (isActive ? btnColAct() : btnCol()) +
+      ";" +
+      "font-size:13px;font-weight:" +
+      (isActive ? "700" : "500") +
+      ";" +
+      "cursor:" +
+      (enabled ? "pointer" : "not-allowed") +
+      ";" +
+      "opacity:" +
+      (enabled ? "1" : "0.35") +
+      ";" +
       "pointer-events:auto;position:static;" +
       "min-width:28px;box-sizing:border-box;border-radius:0;";
     if (enabled && onClick) {
@@ -603,7 +838,9 @@
     setTimeout(findSubScrollContainers, 1500);
     setTimeout(findSubScrollContainers, 4000);
     var mo = new MutationObserver(function () {
-      if (startSubScrollWatcher._t) { clearTimeout(startSubScrollWatcher._t); }
+      if (startSubScrollWatcher._t) {
+        clearTimeout(startSubScrollWatcher._t);
+      }
       startSubScrollWatcher._t = setTimeout(findSubScrollContainers, 800);
     });
     if (document.body) {
@@ -618,7 +855,7 @@
     var host = window.location.hostname.replace("www.", "");
     for (var i = 0; i < INNER_SCROLL_SITES.length; i++) {
       if (host.indexOf(INNER_SCROLL_SITES[i].host) !== -1) {
-        isInnerScroll    = true;
+        isInnerScroll = true;
         innerScrollConfig = INNER_SCROLL_SITES[i];
         return true;
       }
@@ -627,77 +864,136 @@
   }
 
   function findInnerScrollContainer() {
-    if (!innerScrollConfig) { return null; }
+    if (!innerScrollConfig) {
+      return null;
+    }
+
+    // For bodyScroll sites (e.g. Instagram), document.body IS the scroll container
+    if (innerScrollConfig.bodyScroll) {
+      if (
+        document.body &&
+        document.body.scrollHeight > window.innerHeight * 1.2
+      ) {
+        return document.body;
+      }
+    }
+
     var selectors = innerScrollConfig.selectors || [];
     for (var i = 0; i < selectors.length; i++) {
       var el;
-      try { el = document.querySelector(selectors[i]); } catch (e) { continue; }
-      if (!el) { continue; }
-      if (el.scrollHeight > window.innerHeight * 0.5) { return el; }
+      try {
+        el = document.querySelector(selectors[i]);
+      } catch (e) {
+        continue;
+      }
+      if (!el) {
+        continue;
+      }
+      // Validate the element actually scrolls (has overflow scroll/auto and overflows)
+      var cs = window.getComputedStyle(el);
+      var ov = cs.overflowY || cs.overflow;
+      var isScrollable = ov === "auto" || ov === "scroll" || ov === "overlay";
+      var hasOverflow = el.scrollHeight > el.clientHeight + 50;
+      if (
+        (isScrollable && hasOverflow) ||
+        el.scrollHeight > window.innerHeight * 1.2
+      ) {
+        return el;
+      }
     }
     return findTallestScrollable();
   }
 
   function calculateInnerScrollPages() {
-    if (!innerScrollEl) { return; }
-    stepHeight    = getEffectiveStepHeight();
+    if (!innerScrollEl) {
+      return;
+    }
+    stepHeight = getEffectiveStepHeight();
     contentHeight = innerScrollEl.scrollHeight;
-    totalPages = contentHeight <= stepHeight
-      ? 1
-      : Math.ceil(contentHeight / stepHeight);
-    if (totalPages < 1)           { totalPages  = 1; }
-    if (currentPage > totalPages) { currentPage = totalPages; }
+    totalPages =
+      contentHeight <= stepHeight ? 1 : Math.ceil(contentHeight / stepHeight);
+    if (totalPages < 1) {
+      totalPages = 1;
+    }
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
   }
 
   function goToPageInner(page) {
-    if (!innerScrollEl) { return; }
-    page        = Math.max(1, Math.min(page, totalPages));
+    if (!innerScrollEl) {
+      return;
+    }
+    page = Math.max(1, Math.min(page, totalPages));
     currentPage = page;
 
-    var offset    = (currentPage - 1) * stepHeight;
+    var offset = (currentPage - 1) * stepHeight;
     var maxOffset = innerScrollEl.scrollHeight - innerScrollEl.clientHeight;
-    if (maxOffset < 0)      { maxOffset = 0; }
-    if (offset > maxOffset) { offset    = maxOffset; }
+    if (maxOffset < 0) {
+      maxOffset = 0;
+    }
+    if (offset > maxOffset) {
+      offset = maxOffset;
+    }
 
-    // Set scrollTop directly — avoids triggering Instagram's
-    // scroll-event debounce while still moving the container
-    innerScrollEl.scrollTop = offset;
+    // Instant page switch — use scrollTo for body-scroll containers (Instagram),
+    // direct scrollTop otherwise. Both are instant (no animation).
+    if (innerScrollEl === document.body) {
+      document.body.scrollTo(0, offset);
+    } else {
+      innerScrollEl.scrollTop = offset;
+    }
 
-    // Re-fire a scroll event so Instagram's IntersectionObserver
-    // re-evaluates the loading spinner visibility
+    // Re-fire a scroll event so IntersectionObserver-based infinite-scroll
+    // triggers (Instagram, LinkedIn, YouTube) re-evaluate their loading sentinels
     try {
       innerScrollEl.dispatchEvent(new Event("scroll", { bubbles: true }));
-    } catch (e) { }
+    } catch (e) {}
 
     scheduleBarPatch();
   }
 
   function watchInnerScrollContainer() {
-    if (!innerScrollEl) { return; }
+    if (!innerScrollEl) {
+      return;
+    }
 
     if (typeof ResizeObserver !== "undefined") {
       new ResizeObserver(function () {
         var old = totalPages;
         calculateInnerScrollPages();
-        if (totalPages !== old) { scheduleBarRebuild(); }
+        if (totalPages !== old) {
+          scheduleBarRebuild();
+        }
       }).observe(innerScrollEl);
     }
 
     new MutationObserver(function () {
       var old = totalPages;
       calculateInnerScrollPages();
-      if (totalPages !== old) { scheduleBarRebuild(); }
+      if (totalPages !== old) {
+        scheduleBarRebuild();
+      }
     }).observe(innerScrollEl, { childList: true, subtree: true });
 
-    innerScrollEl.addEventListener("wheel", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.deltaY > 0) { goToPageInner(currentPage + 1); }
-      else              { goToPageInner(currentPage - 1); }
-    }, { passive: false, capture: true });
+    innerScrollEl.addEventListener(
+      "wheel",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY > 0) {
+          goToPageInner(currentPage + 1);
+        } else {
+          goToPageInner(currentPage - 1);
+        }
+      },
+      { passive: false, capture: true },
+    );
 
-    innerScrollEl.addEventListener("touchmove", stopEvent,
-      { passive: false, capture: true });
+    innerScrollEl.addEventListener("touchmove", stopEvent, {
+      passive: false,
+      capture: true,
+    });
   }
 
   // =============================================
@@ -707,7 +1003,7 @@
     var host = window.location.hostname.replace("www.", "");
     for (var i = 0; i < AI_CHAT_SITES.length; i++) {
       if (host.indexOf(AI_CHAT_SITES[i].host) !== -1) {
-        isAIChat   = true;
+        isAIChat = true;
         aiChatType = AI_CHAT_SITES[i].name;
         return true;
       }
@@ -726,16 +1022,28 @@
   }
 
   function findAIScrollContainer() {
-    if (!aiChatType) { return null; }
+    if (!aiChatType) {
+      return null;
+    }
     var selectors = AI_SCROLL_SELECTORS[aiChatType] || [];
     for (var i = 0; i < selectors.length; i++) {
       var el;
-      try { el = document.querySelector(selectors[i]); } catch (e) { continue; }
-      if (!el) { continue; }
+      try {
+        el = document.querySelector(selectors[i]);
+      } catch (e) {
+        continue;
+      }
+      if (!el) {
+        continue;
+      }
       var cs = window.getComputedStyle(el);
       var ov = cs.overflowY || cs.overflow;
-      if (el.scrollHeight > el.clientHeight ||
-          ov === "auto" || ov === "scroll" || ov === "overlay") {
+      if (
+        el.scrollHeight > el.clientHeight ||
+        ov === "auto" ||
+        ov === "scroll" ||
+        ov === "overlay"
+      ) {
         return el;
       }
     }
@@ -743,16 +1051,24 @@
   }
 
   function findTallestScrollable() {
-    var best = null, bestRatio = 0;
+    var best = null,
+      bestRatio = 0;
     var divs = document.querySelectorAll("div, main, section, article");
     for (var i = 0; i < divs.length; i++) {
       var el = divs[i];
-      if (el.scrollHeight <= el.clientHeight) { continue; }
+      if (el.scrollHeight <= el.clientHeight) {
+        continue;
+      }
       var cs = window.getComputedStyle(el);
       var ov = cs.overflowY || cs.overflow;
-      if (ov !== "auto" && ov !== "scroll" && ov !== "overlay") { continue; }
+      if (ov !== "auto" && ov !== "scroll" && ov !== "overlay") {
+        continue;
+      }
       var ratio = el.scrollHeight / Math.max(el.clientHeight, 1);
-      if (ratio > bestRatio) { bestRatio = ratio; best = el; }
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        best = el;
+      }
     }
     return best;
   }
@@ -761,44 +1077,62 @@
   // AI CHAT PAGINATION
   // =============================================
   function calculateAIPages() {
-    if (!aiScrollEl) { aiScrollEl = findAIScrollContainer(); }
-    if (!aiScrollEl) { totalPages = 1; return; }
-    stepHeight    = getEffectiveStepHeight();
+    if (!aiScrollEl) {
+      aiScrollEl = findAIScrollContainer();
+    }
+    if (!aiScrollEl) {
+      totalPages = 1;
+      return;
+    }
+    stepHeight = getEffectiveStepHeight();
     contentHeight = aiScrollEl.scrollHeight;
-    totalPages = contentHeight <= stepHeight
-      ? 1
-      : Math.ceil(contentHeight / stepHeight);
-    if (totalPages < 1)           { totalPages  = 1; }
-    if (currentPage > totalPages) { currentPage = totalPages; }
+    totalPages =
+      contentHeight <= stepHeight ? 1 : Math.ceil(contentHeight / stepHeight);
+    if (totalPages < 1) {
+      totalPages = 1;
+    }
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
   }
 
   function goToPageAI(page) {
     if (!aiScrollEl) {
       aiScrollEl = findAIScrollContainer();
-      if (!aiScrollEl) { return; }
+      if (!aiScrollEl) {
+        return;
+      }
     }
-    page        = Math.max(1, Math.min(page, totalPages));
+    page = Math.max(1, Math.min(page, totalPages));
     currentPage = page;
-    var offset    = (currentPage - 1) * stepHeight;
-    var maxOffset = Math.max(0, aiScrollEl.scrollHeight - aiScrollEl.clientHeight);
-    if (offset > maxOffset) { offset = maxOffset; }
-    try {
-      aiScrollEl.scrollTo({ top: offset, behavior: "smooth" });
-    } catch (e) {
-      aiScrollEl.scrollTop = offset;
+    var offset = (currentPage - 1) * stepHeight;
+    var maxOffset = Math.max(
+      0,
+      aiScrollEl.scrollHeight - aiScrollEl.clientHeight,
+    );
+    if (offset > maxOffset) {
+      offset = maxOffset;
     }
+    // Instant switch — no animation
+    aiScrollEl.scrollTop = offset;
     scheduleBarPatch();
   }
 
   function watchAIScrollContainer() {
-    if (!aiScrollEl) { return; }
+    if (!aiScrollEl) {
+      return;
+    }
 
     if (typeof ResizeObserver !== "undefined") {
       new ResizeObserver(function () {
         var old = totalPages;
         calculateAIPages();
-        if (totalPages !== old) { scheduleBarRebuild(); }
-        if (currentPage === old && old < totalPages) { goToPageAI(totalPages); }
+        if (totalPages !== old) {
+          scheduleBarRebuild();
+        }
+        if (currentPage === old && old < totalPages) {
+          goToPageAI(totalPages);
+        }
       }).observe(aiScrollEl);
     }
 
@@ -807,19 +1141,30 @@
       calculateAIPages();
       if (totalPages !== old) {
         scheduleBarRebuild();
-        if (currentPage === old && old < totalPages) { goToPageAI(totalPages); }
+        if (currentPage === old && old < totalPages) {
+          goToPageAI(totalPages);
+        }
       }
     }).observe(aiScrollEl, { childList: true, subtree: true });
 
-    aiScrollEl.addEventListener("wheel", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.deltaY > 0) { goToPageAI(currentPage + 1); }
-      else              { goToPageAI(currentPage - 1); }
-    }, { passive: false, capture: true });
+    aiScrollEl.addEventListener(
+      "wheel",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY > 0) {
+          goToPageAI(currentPage + 1);
+        } else {
+          goToPageAI(currentPage - 1);
+        }
+      },
+      { passive: false, capture: true },
+    );
 
-    aiScrollEl.addEventListener("touchmove", stopEvent,
-      { passive: false, capture: true });
+    aiScrollEl.addEventListener("touchmove", stopEvent, {
+      passive: false,
+      capture: true,
+    });
   }
 
   // =============================================
@@ -832,7 +1177,9 @@
       var skipList = data.skipSites === null ? DEFAULT_SKIP : data.skipSites;
 
       for (var i = 0; i < skipList.length; i++) {
-        if (host.indexOf(skipList[i]) !== -1) { return; }
+        if (host.indexOf(skipList[i]) !== -1) {
+          return;
+        }
       }
       for (var j = 0; j < GENTLE_SITES.length; j++) {
         if (host.indexOf(GENTLE_SITES[j]) !== -1) {
@@ -851,37 +1198,146 @@
 
   chrome.storage.onChanged.addListener(function (changes) {
     var skeys = [
-      "darkMode","muteNotifs","hideLikes",
-      "greyscale","textOnly","noAutoplay"
+      "darkMode",
+      "muteNotifs",
+      "hideLikes",
+      "greyscale",
+      "textOnly",
+      "noAutoplay",
     ];
     var anySettings = false;
     for (var k = 0; k < skeys.length; k++) {
-      if (changes[skeys[k]]) { anySettings = true; break; }
+      if (changes[skeys[k]]) {
+        anySettings = true;
+        break;
+      }
     }
-    if (anySettings) { loadSettings(null); }
+    if (anySettings) {
+      loadSettings(null);
+    }
 
     if (changes.skipSites) {
-      var host    = window.location.hostname.replace("www.", "");
+      var host = window.location.hostname.replace("www.", "");
       var newList = changes.skipSites.newValue || [];
       var oldList = changes.skipSites.oldValue || [];
-      var nowS = false, wasS = false;
+      var nowS = false,
+        wasS = false;
       for (var i = 0; i < newList.length; i++) {
-        if (host.indexOf(newList[i]) !== -1) { nowS = true; break; }
+        if (host.indexOf(newList[i]) !== -1) {
+          nowS = true;
+          break;
+        }
       }
       for (var j = 0; j < oldList.length; j++) {
-        if (host.indexOf(oldList[j]) !== -1) { wasS = true; break; }
+        if (host.indexOf(oldList[j]) !== -1) {
+          wasS = true;
+          break;
+        }
       }
-      if (nowS !== wasS) { window.location.reload(); }
+      if (nowS !== wasS) {
+        window.location.reload();
+      }
     }
   });
 
   // =============================================
   // START EXTENSION
   // =============================================
+  // =============================================
+  // SPA NAVIGATION DETECTION
+  // Wraps history.pushState/replaceState so inner-scroll
+  // sites (Facebook, LinkedIn, YouTube) re-init on route change.
+  // =============================================
+  var lastSPAUrl = window.location.href;
+
+  function onSPANav() {
+    var newUrl = window.location.href;
+    if (newUrl === lastSPAUrl) {
+      return;
+    }
+    lastSPAUrl = newUrl;
+    if (!isInnerScroll && !isGentleMode) {
+      return;
+    }
+    // Tear down and re-init after SPA content settles
+    setTimeout(function () {
+      teardownPagination();
+      setTimeout(initialize, 600);
+    }, 200);
+  }
+
+  function patchHistoryForSPA() {
+    if (window._rpHistPatched) {
+      return;
+    }
+    window._rpHistPatched = true;
+    var origPush = history.pushState.bind(history);
+    var origReplace = history.replaceState.bind(history);
+    history.pushState = function () {
+      origPush.apply(history, arguments);
+      onSPANav();
+    };
+    history.replaceState = function () {
+      origReplace.apply(history, arguments);
+      onSPANav();
+    };
+    window.addEventListener("popstate", onSPANav);
+  }
+
+  function teardownPagination() {
+    // Remove shadow host
+    if (shadowHost && shadowHost.parentNode) {
+      shadowHost.parentNode.removeChild(shadowHost);
+    }
+    shadowHost = null;
+    shadowRoot = null;
+    barRefs = {
+      el: null,
+      first: null,
+      prev: null,
+      nums: [],
+      dots: [],
+      next: null,
+      last: null,
+      info: null,
+      badge: null,
+    };
+    barLastPages = [];
+
+    // Remove wrapper
+    if (wrapper && wrapper.parentNode) {
+      var parent = wrapper._parentEl || wrapper.parentNode;
+      while (wrapper.firstChild) {
+        parent.insertBefore(wrapper.firstChild, wrapper);
+      }
+      if (wrapper.parentNode) {
+        wrapper.parentNode.removeChild(wrapper);
+      }
+    }
+    wrapper = null;
+
+    // Reset state
+    isInitialized = false;
+    currentPage = 1;
+    totalPages = 1;
+    innerScrollEl = null;
+    aiScrollEl = null;
+    subScrollers = [];
+
+    // Restore scrolling
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  }
+
   function startExtension() {
     if (document.documentElement) {
       document.documentElement.style.overflow = "hidden";
     }
+
+    if (isInnerScroll || isGentleMode) {
+      patchHistoryForSPA();
+    }
+
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
         setTimeout(initialize, 500);
@@ -891,12 +1347,16 @@
     }
     window.addEventListener("load", function () {
       setTimeout(function () {
-        if (!isInitialized) { initialize(); }
+        if (!isInitialized) {
+          initialize();
+        }
         setTimeout(function () {
           measureFixedElements();
           calculatePages();
           scheduleBarRebuild();
-          if (settings.noAutoplay) { disableAutoplay(); }
+          if (settings.noAutoplay) {
+            disableAutoplay();
+          }
         }, 600);
       }, 1000);
     });
@@ -906,15 +1366,20 @@
   // WRAP CONTENT
   // =============================================
   function wrapContent() {
-    if (isAIChat || isInnerScroll) { wrapper = null; return; }
+    if (isAIChat || isInnerScroll) {
+      wrapper = null;
+      return;
+    }
 
-    wrapper    = document.createElement("div");
+    wrapper = document.createElement("div");
     wrapper.id = "repage-wrapper";
 
     if (isGentleMode) {
       var main = findMainContent();
       if (main) {
-        while (main.firstChild) { wrapper.appendChild(main.firstChild); }
+        while (main.firstChild) {
+          wrapper.appendChild(main.firstChild);
+        }
         main.appendChild(wrapper);
         wrapper._parentEl = main;
       } else {
@@ -929,8 +1394,12 @@
       "top:0px !important;" +
       "left:0 !important;" +
       "width:100% !important;" +
-      "padding-top:"    + fixedTopOffset + "px !important;" +
-      "padding-bottom:" + (BASE_BAR_HEIGHT + fixedBottomOffset) + "px !important;" +
+      "padding-top:" +
+      fixedTopOffset +
+      "px !important;" +
+      "padding-bottom:" +
+      (BASE_BAR_HEIGHT + fixedBottomOffset) +
+      "px !important;" +
       "box-sizing:border-box !important;";
   }
 
@@ -945,12 +1414,18 @@
 
   function findMainContent() {
     var sel = [
-      "main", "[role='main']", "#main",
-      "#content", ".main-content", "article"
+      "main",
+      "[role='main']",
+      "#main",
+      "#content",
+      ".main-content",
+      "article",
     ];
     for (var i = 0; i < sel.length; i++) {
       var el = document.querySelector(sel[i]);
-      if (el) { return el; }
+      if (el) {
+        return el;
+      }
     }
     return null;
   }
@@ -958,37 +1433,77 @@
   // =============================================
   // KILL SCROLLING
   // =============================================
+  // Check if an event originated from inside our shadow host or a sub-scroll bar
+  function isOurUI(e) {
+    // Shadow host — wheel events on shadow DOM are retargeted to the host
+    if (shadowHost && e.target === shadowHost) {
+      return true;
+    }
+    // Walk composedPath for sub-scroll bars and modal bars injected in light DOM
+    if (e.composedPath) {
+      var path = e.composedPath();
+      for (var pi = 0; pi < path.length; pi++) {
+        var node = path[pi];
+        if (node === shadowHost) {
+          return true;
+        }
+        if (node && node.id === "repage-modal-bar") {
+          return true;
+        }
+        if (node && node._rpSub) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   function killScrolling() {
-    document.documentElement.classList.add("repage-active");
+    // No class mutation on documentElement — overflow set via inline style in initialize()
 
-    document.addEventListener("wheel", function (e) {
-      if (e.target && e.target.closest) {
-        if (e.target.closest("#repage-bar"))        { return; }
-        if (e.target.closest("#repage-modal-bar"))  { return; }
-        if (e.target.closest(".repage-subpaged"))   { return; }
-      }
-      if (isInnerScroll && innerScrollEl &&
-          innerScrollEl.contains(e.target))         { return; }
-      if (isAIChat) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      stopEvent(e);
-    }, { passive: false, capture: true });
+    document.addEventListener(
+      "wheel",
+      function (e) {
+        if (isOurUI(e)) {
+          return;
+        }
+        if (
+          isInnerScroll &&
+          innerScrollEl &&
+          innerScrollEl.contains(e.target)
+        ) {
+          return;
+        }
+        if (isAIChat) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        stopEvent(e);
+      },
+      { passive: false, capture: true },
+    );
 
-    document.addEventListener("touchmove", function (e) {
-      if (e.target && e.target.closest) {
-        if (e.target.closest("#repage-bar"))        { return; }
-        if (e.target.closest("#repage-modal-bar"))  { return; }
-        if (e.target.closest(".repage-subpaged"))   { return; }
-      }
-      if (isInnerScroll && innerScrollEl &&
-          innerScrollEl.contains(e.target))         { return; }
-      if (isAIChat && aiScrollEl &&
-          aiScrollEl.contains(e.target))            { return; }
-      stopEvent(e);
-    }, { passive: false, capture: true });
+    document.addEventListener(
+      "touchmove",
+      function (e) {
+        if (isOurUI(e)) {
+          return;
+        }
+        if (
+          isInnerScroll &&
+          innerScrollEl &&
+          innerScrollEl.contains(e.target)
+        ) {
+          return;
+        }
+        if (isAIChat && aiScrollEl && aiScrollEl.contains(e.target)) {
+          return;
+        }
+        stopEvent(e);
+      },
+      { passive: false, capture: true },
+    );
 
     document.addEventListener("keydown", handleKeys, { capture: true });
 
@@ -998,9 +1513,13 @@
       }
     }, 50);
 
-    window.addEventListener("scroll", function () {
-      window.scrollTo(0, 0);
-    }, { passive: true, capture: true });
+    window.addEventListener(
+      "scroll",
+      function () {
+        window.scrollTo(0, 0);
+      },
+      { passive: true, capture: true },
+    );
   }
 
   function stopEvent(e) {
@@ -1013,40 +1532,64 @@
   // KEYBOARD HANDLER
   // =============================================
   function handleKeys(e) {
-    var tag = e.target && e.target.tagName
-      ? e.target.tagName.toUpperCase() : "";
-    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") { return; }
-    if (e.target && e.target.isContentEditable) { return; }
-    if (e.metaKey || e.ctrlKey || e.altKey) { return; }
+    var tag =
+      e.target && e.target.tagName ? e.target.tagName.toUpperCase() : "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      return;
+    }
+    if (e.target && e.target.isContentEditable) {
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      return;
+    }
 
     var key = e.key || "";
 
-    if (key === "x" || key === "X" ||
-        key === "ArrowRight" || key === "PageDown" || key === " ") {
-      e.preventDefault(); e.stopPropagation();
+    if (
+      key === "x" ||
+      key === "X" ||
+      key === "ArrowRight" ||
+      key === "PageDown" ||
+      key === " "
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
       navigateByOne(1);
       return;
     }
-    if (key === "z" || key === "Z" ||
-        key === "ArrowLeft" || key === "PageUp") {
-      e.preventDefault(); e.stopPropagation();
+    if (key === "z" || key === "Z" || key === "ArrowLeft" || key === "PageUp") {
+      e.preventDefault();
+      e.stopPropagation();
       navigateByOne(-1);
       return;
     }
     if (key === "Home") {
-      e.preventDefault(); e.stopPropagation();
-      if (activeModal)       { navigateModal(1); }
-      else if (isAIChat)     { goToPageAI(1); }
-      else if (isInnerScroll){ goToPageInner(1); }
-      else                   { goToPage(1); }
+      e.preventDefault();
+      e.stopPropagation();
+      if (activeModal) {
+        navigateModal(1);
+      } else if (isAIChat) {
+        goToPageAI(1);
+      } else if (isInnerScroll) {
+        goToPageInner(1);
+      } else {
+        goToPage(1);
+      }
       return;
     }
     if (key === "End") {
-      e.preventDefault(); e.stopPropagation();
-      if (activeModal)       { navigateModal(modalTotalPages); }
-      else if (isAIChat)     { goToPageAI(totalPages); }
-      else if (isInnerScroll){ goToPageInner(totalPages); }
-      else                   { goToPage(totalPages); }
+      e.preventDefault();
+      e.stopPropagation();
+      if (activeModal) {
+        navigateModal(modalTotalPages);
+      } else if (isAIChat) {
+        goToPageAI(totalPages);
+      } else if (isInnerScroll) {
+        goToPageInner(totalPages);
+      } else {
+        goToPage(totalPages);
+      }
       return;
     }
     if (key === "ArrowDown" || key === "ArrowUp") {
@@ -1056,10 +1599,15 @@
   }
 
   function navigateByOne(dir) {
-    if (activeModal)        { navigateModal(modalPage + dir);       }
-    else if (isAIChat)      { goToPageAI(currentPage + dir);        }
-    else if (isInnerScroll) { goToPageInner(currentPage + dir);     }
-    else                    { goToPage(currentPage + dir);          }
+    if (activeModal) {
+      navigateModal(modalPage + dir);
+    } else if (isAIChat) {
+      goToPageAI(currentPage + dir);
+    } else if (isInnerScroll) {
+      goToPageInner(currentPage + dir);
+    } else {
+      goToPage(currentPage + dir);
+    }
   }
 
   // =============================================
@@ -1067,13 +1615,17 @@
   // =============================================
   function startModalWatcher() {
     var observer = new MutationObserver(function () {
-      if (startModalWatcher._deb) { clearTimeout(startModalWatcher._deb); }
+      if (startModalWatcher._deb) {
+        clearTimeout(startModalWatcher._deb);
+      }
       startModalWatcher._deb = setTimeout(detectModal, 300);
     });
     if (document.body) {
       observer.observe(document.body, {
-        childList: true, subtree: true, attributes: true,
-        attributeFilter: ["style","class","aria-modal","role"]
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["style", "class", "aria-modal", "role"],
       });
     }
     setTimeout(detectModal, 1000);
@@ -1083,30 +1635,53 @@
   function detectModal() {
     var candidates = document.querySelectorAll(
       '[role="dialog"],[role="alertdialog"],[aria-modal="true"],' +
-      '.modal,.Modal,.overlay,.Overlay,.dialog,.Dialog,.popup,.Popup,' +
-      '[class*="modal"],[class*="Modal"],[class*="dialog"],[class*="Dialog"],' +
-      '[class*="cookie"],[class*="Cookie"],[class*="consent"],[class*="Consent"],' +
-      '[class*="gdpr"],[class*="GDPR"]'
+        ".modal,.Modal,.overlay,.Overlay,.dialog,.Dialog,.popup,.Popup," +
+        '[class*="modal"],[class*="Modal"],[class*="dialog"],[class*="Dialog"],' +
+        '[class*="cookie"],[class*="Cookie"],[class*="consent"],[class*="Consent"],' +
+        '[class*="gdpr"],[class*="GDPR"]',
     );
-    var bestModal = null, bestScore = 0;
+    var bestModal = null,
+      bestScore = 0;
 
     for (var i = 0; i < candidates.length; i++) {
       var el = candidates[i];
-      if ((el.id || "").indexOf("repage") === 0) { continue; }
+      if ((el.id || "").indexOf("repage") === 0) {
+        continue;
+      }
       var cs;
-      try { cs = window.getComputedStyle(el); } catch (err) { continue; }
-      if (cs.display === "none" || cs.visibility === "hidden") { continue; }
-      if (parseFloat(cs.opacity) < 0.1) { continue; }
+      try {
+        cs = window.getComputedStyle(el);
+      } catch (err) {
+        continue;
+      }
+      if (cs.display === "none" || cs.visibility === "hidden") {
+        continue;
+      }
+      if (parseFloat(cs.opacity) < 0.1) {
+        continue;
+      }
       var pos = cs.position;
-      if (pos !== "fixed" && pos !== "absolute") { continue; }
+      if (pos !== "fixed" && pos !== "absolute") {
+        continue;
+      }
       var rect = el.getBoundingClientRect();
-      if (rect.width < 100 || rect.height < 50) { continue; }
+      if (rect.width < 100 || rect.height < 50) {
+        continue;
+      }
       var score = rect.width * rect.height;
-      if (pos === "fixed") { score *= 2; }
-      var dist = Math.abs((rect.left + rect.width / 2)  - window.innerWidth  / 2) +
-                 Math.abs((rect.top  + rect.height / 2) - window.innerHeight / 2);
-      if (dist < 200) { score *= 1.5; }
-      if (score > bestScore) { bestScore = score; bestModal = el; }
+      if (pos === "fixed") {
+        score *= 2;
+      }
+      var dist =
+        Math.abs(rect.left + rect.width / 2 - window.innerWidth / 2) +
+        Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
+      if (dist < 200) {
+        score *= 1.5;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestModal = el;
+      }
     }
 
     if (bestModal && bestModal !== activeModal) {
@@ -1117,13 +1692,17 @@
   }
 
   function activateModalPagination(modalEl) {
-    activeModal = modalEl; modalPage = 1;
+    activeModal = modalEl;
+    modalPage = 1;
     if (modalEl.scrollHeight <= modalEl.clientHeight) {
-      activeModal = null; return;
+      activeModal = null;
+      return;
     }
-    modalStepHeight  = modalEl.clientHeight;
-    modalTotalPages  = Math.max(1,
-      Math.ceil(modalEl.scrollHeight / modalStepHeight));
+    modalStepHeight = modalEl.clientHeight;
+    modalTotalPages = Math.max(
+      1,
+      Math.ceil(modalEl.scrollHeight / modalStepHeight),
+    );
     modalEl.style.overflow = modalEl.style.overflowY = "hidden";
     buildModalControls(modalEl);
     navigateModal(1);
@@ -1131,37 +1710,51 @@
 
   function deactivateModalPagination() {
     var ex = document.getElementById("repage-modal-bar");
-    if (ex && ex.parentNode) { ex.parentNode.removeChild(ex); }
+    if (ex && ex.parentNode) {
+      ex.parentNode.removeChild(ex);
+    }
     if (activeModal) {
       try {
-        activeModal.style.overflow  = "";
+        activeModal.style.overflow = "";
         activeModal.style.overflowY = "";
-      } catch (e) { }
+      } catch (e) {}
     }
-    activeModal = null; modalPage = 1;
-    modalTotalPages = 1; modalStepHeight = 0;
+    activeModal = null;
+    modalPage = 1;
+    modalTotalPages = 1;
+    modalStepHeight = 0;
   }
 
   function navigateModal(page) {
-    if (!activeModal) { return; }
+    if (!activeModal) {
+      return;
+    }
     modalPage = Math.max(1, Math.min(page, modalTotalPages));
-    var offset    = (modalPage - 1) * modalStepHeight;
+    var offset = (modalPage - 1) * modalStepHeight;
     var maxOffset = activeModal.scrollHeight - activeModal.clientHeight;
-    if (offset > maxOffset) { offset = maxOffset; }
+    if (offset > maxOffset) {
+      offset = maxOffset;
+    }
     activeModal.scrollTop = offset;
     updateModalControls();
   }
 
   function buildModalControls(modalEl) {
     var ex = document.getElementById("repage-modal-bar");
-    if (ex && ex.parentNode) { ex.parentNode.removeChild(ex); }
+    if (ex && ex.parentNode) {
+      ex.parentNode.removeChild(ex);
+    }
     var bar = document.createElement("div");
-    bar.id  = "repage-modal-bar";
+    bar.id = "repage-modal-bar";
     bar.style.cssText =
       "position:sticky;bottom:0;left:0;width:100%;height:36px;" +
-      "background:" + barBg() + ";" +
+      "background:" +
+      barBg() +
+      ";" +
       "display:flex;justify-content:center;align-items:stretch;gap:0;" +
-      "z-index:2147483647;border-top:1px solid " + barBorder() + ";" +
+      "z-index:2147483647;border-top:1px solid " +
+      barBorder() +
+      ";" +
       "pointer-events:auto;box-sizing:border-box;";
     modalEl.appendChild(bar);
     updateModalControls();
@@ -1169,13 +1762,18 @@
 
   function updateModalControls() {
     var bar = document.getElementById("repage-modal-bar");
-    if (!bar) { return; }
-    while (bar.firstChild) { bar.removeChild(bar.firstChild); }
+    if (!bar) {
+      return;
+    }
+    while (bar.firstChild) {
+      bar.removeChild(bar.firstChild);
+    }
 
     var prev = makeModalBtn("Prev", modalPage === 1);
     if (modalPage > 1) {
       prev.addEventListener("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
         navigateModal(modalPage - 1);
       });
     }
@@ -1184,14 +1782,17 @@
     var info = document.createElement("span");
     info.textContent = modalPage + " / " + modalTotalPages;
     info.style.cssText =
-      "color:" + infoCol() + ";font-size:11px;" +
+      "color:" +
+      infoCol() +
+      ";font-size:11px;" +
       "display:flex;align-items:center;padding:0 8px;";
     bar.appendChild(info);
 
     var next = makeModalBtn("Next", modalPage === modalTotalPages);
     if (modalPage < modalTotalPages) {
       next.addEventListener("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
         navigateModal(modalPage + 1);
       });
     }
@@ -1204,11 +1805,21 @@
     btn.style.cssText =
       "display:flex;align-items:center;justify-content:center;" +
       "height:100%;padding:0 14px;border:none;" +
-      "border-right:1px solid " + btnBorder() + ";" +
-      "background:" + btnBg() + ";color:" + btnCol() + ";" +
+      "border-right:1px solid " +
+      btnBorder() +
+      ";" +
+      "background:" +
+      btnBg() +
+      ";color:" +
+      btnCol() +
+      ";" +
       "border-radius:0;" +
-      "cursor:" + (isDisabled ? "not-allowed" : "pointer") + ";" +
-      "font-size:12px;opacity:" + (isDisabled ? "0.3" : "1") + ";" +
+      "cursor:" +
+      (isDisabled ? "not-allowed" : "pointer") +
+      ";" +
+      "font-size:12px;opacity:" +
+      (isDisabled ? "0.3" : "1") +
+      ";" +
       "pointer-events:auto;position:static;box-sizing:border-box;";
     return btn;
   }
@@ -1217,43 +1828,66 @@
   // CALCULATE PAGES (standard mode)
   // =============================================
   function calculatePages() {
-    if (isAIChat)      { calculateAIPages();          return; }
-    if (isInnerScroll) { calculateInnerScrollPages(); return; }
+    if (isAIChat) {
+      calculateAIPages();
+      return;
+    }
+    if (isInnerScroll) {
+      calculateInnerScrollPages();
+      return;
+    }
 
     stepHeight = getEffectiveStepHeight();
     contentHeight = wrapper
       ? wrapper.scrollHeight
       : Math.max(
           document.body ? document.body.scrollHeight : 0,
-          document.documentElement.scrollHeight || 0
+          document.documentElement.scrollHeight || 0,
         );
 
-    if (stepHeight < 1) { stepHeight = window.innerHeight || 400; }
+    if (stepHeight < 1) {
+      stepHeight = window.innerHeight || 400;
+    }
 
-    totalPages = contentHeight <= stepHeight
-      ? 1
-      : Math.ceil(contentHeight / stepHeight);
+    totalPages =
+      contentHeight <= stepHeight ? 1 : Math.ceil(contentHeight / stepHeight);
 
-    if (totalPages  < 1)          { totalPages  = 1; }
-    if (currentPage > totalPages) { currentPage = totalPages; }
+    if (totalPages < 1) {
+      totalPages = 1;
+    }
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
   }
 
   // =============================================
   // GO TO PAGE (standard mode)
   // =============================================
   function goToPage(page) {
-    if (isAIChat)      { goToPageAI(page);    return; }
-    if (isInnerScroll) { goToPageInner(page); return; }
+    if (isAIChat) {
+      goToPageAI(page);
+      return;
+    }
+    if (isInnerScroll) {
+      goToPageInner(page);
+      return;
+    }
 
-    page        = Math.max(1, Math.min(page, totalPages));
+    page = Math.max(1, Math.min(page, totalPages));
     currentPage = page;
 
     if (wrapper) {
       var rawOffset = (currentPage - 1) * stepHeight - fixedTopOffset;
-      if (rawOffset < 0) { rawOffset = 0; }
+      if (rawOffset < 0) {
+        rawOffset = 0;
+      }
       var maxOffset = contentHeight - stepHeight;
-      if (maxOffset < 0)          { maxOffset = 0; }
-      if (rawOffset > maxOffset)  { rawOffset = maxOffset; }
+      if (maxOffset < 0) {
+        maxOffset = 0;
+      }
+      if (rawOffset > maxOffset) {
+        rawOffset = maxOffset;
+      }
       wrapper.style.top = "-" + rawOffset + "px";
     }
 
@@ -1265,17 +1899,26 @@
   // PAGE NUMBER SEQUENCE
   // =============================================
   function getPageNumbers(current, total) {
-    var pages = [], i;
+    var pages = [],
+      i;
     if (total <= 9) {
-      for (i = 1; i <= total; i++) { pages.push(i); }
+      for (i = 1; i <= total; i++) {
+        pages.push(i);
+      }
       return pages;
     }
     pages.push(1);
-    if (current > 4) { pages.push("dots"); }
+    if (current > 4) {
+      pages.push("dots");
+    }
     var start = Math.max(2, current - 2);
-    var end   = Math.min(total - 1, current + 2);
-    for (i = start; i <= end; i++) { pages.push(i); }
-    if (current < total - 3) { pages.push("dots"); }
+    var end = Math.min(total - 1, current + 2);
+    for (i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (current < total - 3) {
+      pages.push("dots");
+    }
     pages.push(total);
     return pages;
   }
@@ -1296,15 +1939,15 @@
   // Stable references to every interactive node in the bar.
   // Populated by buildBar(), read by patchBarInPlace().
   var barRefs = {
-    el:    null,   // the bar div itself
+    el: null, // the bar div itself
     first: null,
-    prev:  null,
-    nums:  [],     // [{el, page}]  — page number buttons only
-    dots:  [],     // dot spans (kept for colour updates)
-    next:  null,
-    last:  null,
-    info:  null,
-    badge: null
+    prev: null,
+    nums: [], // [{el, page}]  — page number buttons only
+    dots: [], // dot spans (kept for colour updates)
+    next: null,
+    last: null,
+    info: null,
+    badge: null,
   };
 
   // The page-number window that was last rendered.
@@ -1313,63 +1956,112 @@
   var barLastPages = [];
 
   function buildBar() {
-    // ── Remove old bar ──────────────────────────
-    var old = document.getElementById("repage-bar");
-    if (old && old.parentNode) { old.parentNode.removeChild(old); }
+    // ── Remove old shadow host ──────────────────
+    if (shadowHost && shadowHost.parentNode) {
+      shadowHost.parentNode.removeChild(shadowHost);
+    }
+    shadowHost = null;
+    shadowRoot = null;
 
     // Reset refs
     barRefs = {
-      el: null, first: null, prev: null,
-      nums: [], dots: [], next: null, last: null,
-      info: null, badge: null
+      el: null,
+      first: null,
+      prev: null,
+      nums: [],
+      dots: [],
+      next: null,
+      last: null,
+      info: null,
+      badge: null,
     };
     barLastPages = [];
 
-    if (!document.body) { return; }
+    if (!document.body) {
+      return;
+    }
 
-    // ── Create bar shell ────────────────────────
+    // ── Shadow host — no id/class, invisible to page JS ─
+    shadowHost = document.createElement("div");
+    shadowHost.setAttribute(
+      "style",
+      "position:fixed !important;" +
+        "bottom:0 !important;" +
+        "left:0 !important;" +
+        "width:100vw !important;" +
+        "height:" +
+        BASE_BAR_HEIGHT +
+        "px !important;" +
+        "z-index:2147483647 !important;" +
+        "pointer-events:auto !important;" +
+        "margin:0 !important;" +
+        "padding:0 !important;",
+    );
+    shadowRoot = shadowHost.attachShadow({ mode: "closed" });
+
+    // ── Bar styles inside shadow root ───────────
+    var shadowStyle = document.createElement("style");
+    shadowStyle.textContent =
+      ":host { all: initial; }" +
+      "* { box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; }";
+    shadowRoot.appendChild(shadowStyle);
+
+    // ── Create bar shell inside shadow root ─────
     var barEl = document.createElement("div");
-    barEl.id  = "repage-bar";
 
     // All layout is done with inline styles that carry !important
     // so host-page CSS cannot interfere.
-    barEl.setAttribute("style",
+    barEl.setAttribute(
+      "style",
       "position:fixed !important;" +
-      "bottom:0 !important;" +
-      "left:0 !important;" +
-      "width:100vw !important;" +
-      "height:" + BASE_BAR_HEIGHT + "px !important;" +
-      "min-height:" + BASE_BAR_HEIGHT + "px !important;" +
-      "max-height:" + BASE_BAR_HEIGHT + "px !important;" +
-      "display:flex !important;" +
-      "flex-direction:row !important;" +
-      "align-items:stretch !important;" +
-      "justify-content:flex-start !important;" +
-      "gap:0 !important;" +
-      "z-index:2147483647 !important;" +
-      "border-top:2px solid " + barBorder() + " !important;" +
-      "background:" + barBg() + " !important;" +
-      "padding:0 !important;" +
-      "margin:0 !important;" +
-      "overflow:hidden !important;" +
-      "pointer-events:auto !important;" +
-      "transform:translateZ(0) !important;" +
-      "isolation:isolate !important;" +
-      "box-sizing:border-box !important;" +
-      "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;"
+        "bottom:0 !important;" +
+        "left:0 !important;" +
+        "width:100vw !important;" +
+        "height:" +
+        BASE_BAR_HEIGHT +
+        "px !important;" +
+        "min-height:" +
+        BASE_BAR_HEIGHT +
+        "px !important;" +
+        "max-height:" +
+        BASE_BAR_HEIGHT +
+        "px !important;" +
+        "display:flex !important;" +
+        "flex-direction:row !important;" +
+        "align-items:stretch !important;" +
+        "justify-content:flex-start !important;" +
+        "gap:0 !important;" +
+        "z-index:2147483647 !important;" +
+        "border-top:2px solid " +
+        barBorder() +
+        " !important;" +
+        "background:" +
+        barBg() +
+        " !important;" +
+        "padding:0 !important;" +
+        "margin:0 !important;" +
+        "overflow:hidden !important;" +
+        "pointer-events:auto !important;" +
+        "transform:translateZ(0) !important;" +
+        "isolation:isolate !important;" +
+        "box-sizing:border-box !important;" +
+        "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;",
     );
     barRefs.el = barEl;
 
     // ── AI badge ────────────────────────────────
     if (isAIChat) {
       var badge = document.createElement("span");
-      badge.setAttribute("style",
+      badge.setAttribute(
+        "style",
         "display:flex !important;align-items:center !important;" +
-        "flex:0 0 auto !important;padding:0 8px !important;" +
-        "font-size:10px !important;font-weight:700 !important;" +
-        "color:#4cc9f0 !important;border-right:1px solid " + btnBorder() + " !important;" +
-        "white-space:nowrap !important;letter-spacing:0.05em !important;" +
-        "box-sizing:border-box !important;"
+          "flex:0 0 auto !important;padding:0 8px !important;" +
+          "font-size:10px !important;font-weight:700 !important;" +
+          "color:#4cc9f0 !important;border-right:1px solid " +
+          btnBorder() +
+          " !important;" +
+          "white-space:nowrap !important;letter-spacing:0.05em !important;" +
+          "box-sizing:border-box !important;",
       );
       badge.textContent = "AI";
       barEl.appendChild(badge);
@@ -1414,19 +2106,25 @@
 
     // ── Info label ──────────────────────────────
     var info = document.createElement("span");
-    info.setAttribute("style",
+    info.setAttribute(
+      "style",
       "display:flex !important;align-items:center !important;" +
-      "flex:0 0 auto !important;padding:0 12px !important;" +
-      "font-size:11px !important;white-space:nowrap !important;" +
-      "color:" + infoCol() + " !important;" +
-      "border-left:1px solid " + btnBorder() + " !important;" +
-      "box-sizing:border-box !important;" +
-      "margin-left:auto !important;"
+        "flex:0 0 auto !important;padding:0 12px !important;" +
+        "font-size:11px !important;white-space:nowrap !important;" +
+        "color:" +
+        infoCol() +
+        " !important;" +
+        "border-left:1px solid " +
+        btnBorder() +
+        " !important;" +
+        "box-sizing:border-box !important;" +
+        "margin-left:auto !important;",
     );
     barEl.appendChild(info);
     barRefs.info = info;
 
-    document.body.appendChild(barEl);
+    shadowRoot.appendChild(barEl);
+    document.body.appendChild(shadowHost);
 
     // Now apply all state (active page, disabled states, colours)
     // using the same patch path used during navigation — single
@@ -1440,34 +2138,41 @@
   function createBarBtn(label, isPageNum) {
     var btn = document.createElement("button");
     btn.textContent = label;
-    btn.setAttribute("style",
+    btn.setAttribute(
+      "style",
       "display:flex !important;" +
-      "align-items:center !important;" +
-      "justify-content:center !important;" +
-      "height:100% !important;" +
-      (isPageNum
-        ? "flex:1 1 0% !important;min-width:0 !important;"
-        : "flex:0 0 auto !important;min-width:52px !important;") +
-      "padding:0 6px !important;" +
-      "margin:0 !important;" +
-      "border:none !important;" +
-      "border-right:1px solid " + btnBorder() + " !important;" +
-      "background:" + btnBg() + " !important;" +
-      "color:" + btnCol() + " !important;" +
-      "border-radius:0 !important;" +
-      "cursor:pointer !important;" +
-      "font-size:13px !important;" +
-      "font-weight:500 !important;" +
-      "opacity:1 !important;" +
-      "pointer-events:auto !important;" +
-      "position:static !important;" +
-      "text-decoration:none !important;" +
-      "float:none !important;" +
-      "box-sizing:border-box !important;" +
-      "white-space:nowrap !important;" +
-      "overflow:hidden !important;" +
-      "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;" +
-      "transition:background 0.1s ease, color 0.1s ease !important;"
+        "align-items:center !important;" +
+        "justify-content:center !important;" +
+        "height:100% !important;" +
+        (isPageNum
+          ? "flex:1 1 0% !important;min-width:0 !important;"
+          : "flex:0 0 auto !important;min-width:52px !important;") +
+        "padding:0 6px !important;" +
+        "margin:0 !important;" +
+        "border:none !important;" +
+        "border-right:1px solid " +
+        btnBorder() +
+        " !important;" +
+        "background:" +
+        btnBg() +
+        " !important;" +
+        "color:" +
+        btnCol() +
+        " !important;" +
+        "border-radius:0 !important;" +
+        "cursor:pointer !important;" +
+        "font-size:13px !important;" +
+        "font-weight:500 !important;" +
+        "opacity:1 !important;" +
+        "pointer-events:auto !important;" +
+        "position:static !important;" +
+        "text-decoration:none !important;" +
+        "float:none !important;" +
+        "box-sizing:border-box !important;" +
+        "white-space:nowrap !important;" +
+        "overflow:hidden !important;" +
+        "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;" +
+        "transition:background 0.1s ease, color 0.1s ease !important;",
     );
 
     // Hover highlight — mouseenter/leave so theme colours
@@ -1490,16 +2195,21 @@
   function createDotSpan() {
     var d = document.createElement("span");
     d.textContent = "…";
-    d.setAttribute("style",
+    d.setAttribute(
+      "style",
       "display:flex !important;align-items:center !important;" +
-      "justify-content:center !important;" +
-      "flex:1 1 0% !important;min-width:0 !important;" +
-      "padding:0 !important;" +
-      "font-size:16px !important;" +
-      "color:" + dotsCol() + " !important;" +
-      "background:" + barBg() + " !important;" +
-      "box-sizing:border-box !important;" +
-      "pointer-events:none !important;"
+        "justify-content:center !important;" +
+        "flex:1 1 0% !important;min-width:0 !important;" +
+        "padding:0 !important;" +
+        "font-size:16px !important;" +
+        "color:" +
+        dotsCol() +
+        " !important;" +
+        "background:" +
+        barBg() +
+        " !important;" +
+        "box-sizing:border-box !important;" +
+        "pointer-events:none !important;",
     );
     return d;
   }
@@ -1509,7 +2219,9 @@
   // No elements are created or destroyed here unless
   // the page-number window changes shape (rare).
   function patchBarInPlace() {
-    if (!barRefs.el) { return; }
+    if (!barRefs.el) {
+      return;
+    }
 
     var pages = getPageNumbers(currentPage, totalPages);
 
@@ -1521,7 +2233,7 @@
     }
 
     // ── Bar background / border colour ──────────
-    barRefs.el.style.setProperty("background",   barBg(),     "important");
+    barRefs.el.style.setProperty("background", barBg(), "important");
     barRefs.el.style.setProperty("border-color", barBorder(), "important");
 
     // ── First ───────────────────────────────────
@@ -1537,22 +2249,22 @@
     // ── Page number slots ────────────────────────
     for (var i = 0; i < barRefs.nums.length; i++) {
       var ref = barRefs.nums[i];
-      var pg  = pages[i];
+      var pg = pages[i];
 
       if (pg === "dots") {
         // Dot span — just refresh colour
-        ref.el.style.setProperty("color",      dotsCol(), "important");
-        ref.el.style.setProperty("background", barBg(),   "important");
+        ref.el.style.setProperty("color", dotsCol(), "important");
+        ref.el.style.setProperty("background", barBg(), "important");
         ref.page = "dots";
         continue;
       }
 
       // Update label and stored page number
       ref.el.textContent = String(pg);
-      ref.page           = pg;
-      barLastPages[i]    = pg;
+      ref.page = pg;
+      barLastPages[i] = pg;
 
-      var isActive = (pg === currentPage);
+      var isActive = pg === currentPage;
       // Capture pg in closure correctly
       (function (targetPage, isAct) {
         applyBtnState(ref.el, isAct, false, function () {
@@ -1574,7 +2286,7 @@
     // ── Info label ───────────────────────────────
     if (barRefs.info) {
       barRefs.info.textContent = "Page " + currentPage + " / " + totalPages;
-      barRefs.info.style.setProperty("color",        infoCol(),   "important");
+      barRefs.info.style.setProperty("color", infoCol(), "important");
       barRefs.info.style.setProperty("border-color", btnBorder(), "important");
     }
   }
@@ -1584,34 +2296,46 @@
   // so re-calling applyBtnState replaces the handler
   // cleanly without listener accumulation.
   function applyBtnState(btn, isActive, isDisabled, onClick) {
-    if (!btn) { return; }
+    if (!btn) {
+      return;
+    }
 
-    btn.dataset.active   = isActive   ? "1" : "0";
+    btn.dataset.active = isActive ? "1" : "0";
     btn.dataset.disabled = isDisabled ? "1" : "0";
 
-    var bg  = isActive   ? btnBgAct() : btnBg();
-    var col = isActive   ? btnColAct() : btnCol();
+    var bg = isActive ? btnBgAct() : btnBg();
+    var col = isActive ? btnColAct() : btnCol();
 
-    btn.style.setProperty("background",  bg,                               "important");
-    btn.style.setProperty("color",       col,                              "important");
-    btn.style.setProperty("font-weight", isActive   ? "700"    : "500",   "important");
-    btn.style.setProperty("opacity",     isDisabled ? "0.35"   : "1",     "important");
-    btn.style.setProperty("cursor",      isDisabled ? "not-allowed" : "pointer", "important");
-    btn.style.setProperty("border-right-color", btnBorder(),              "important");
+    btn.style.setProperty("background", bg, "important");
+    btn.style.setProperty("color", col, "important");
+    btn.style.setProperty("font-weight", isActive ? "700" : "500", "important");
+    btn.style.setProperty("opacity", isDisabled ? "0.35" : "1", "important");
+    btn.style.setProperty(
+      "cursor",
+      isDisabled ? "not-allowed" : "pointer",
+      "important",
+    );
+    btn.style.setProperty("border-right-color", btnBorder(), "important");
 
     // Replace click handler atomically — no listener stacking
-    btn.onclick = isDisabled ? null : function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      onClick();
-    };
+    btn.onclick = isDisabled
+      ? null
+      : function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        };
   }
 
   // ── Route a page number to the right navigation function ──
   function dispatch(page) {
-    if (isAIChat)       { goToPageAI(page);    }
-    else if (isInnerScroll) { goToPageInner(page); }
-    else                { goToPage(page);      }
+    if (isAIChat) {
+      goToPageAI(page);
+    } else if (isInnerScroll) {
+      goToPageInner(page);
+    } else {
+      goToPage(page);
+    }
   }
 
   // =============================================
@@ -1620,36 +2344,49 @@
   function showNotice() {
     var modeLabel = isAIChat
       ? "AI Chat mode"
-      : (isInnerScroll
-          ? "Feed mode"
-          : (isGentleMode ? "Gentle mode" : "Active"));
+      : isInnerScroll
+        ? "Feed mode"
+        : isGentleMode
+          ? "Gentle mode"
+          : "Active";
 
     var logoSrc = "";
     try {
       logoSrc = chrome.runtime.getURL("repage.png");
-    } catch (e) { }
+    } catch (e) {}
 
     var n = document.createElement("div");
-    n.setAttribute("style",
+    n.setAttribute(
+      "style",
       "position:fixed !important;top:16px !important;right:16px !important;" +
-      "background:" + barBg() + " !important;" +
-      "color:" + btnCol() + " !important;" +
-      "padding:12px 18px !important;border-radius:8px !important;" +
-      "border:1px solid " + barBorder() + " !important;" +
-      "z-index:2147483647 !important;" +
-      "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;" +
-      "font-size:13px !important;line-height:1.6 !important;" +
-      "box-shadow:0 4px 20px rgba(0,0,0,0.4) !important;" +
-      "max-width:280px !important;pointer-events:none !important;" +
-      "opacity:1 !important;transition:opacity 0.5s ease !important;" +
-      "isolation:isolate !important;"
+        "background:" +
+        barBg() +
+        " !important;" +
+        "color:" +
+        btnCol() +
+        " !important;" +
+        "padding:12px 18px !important;border-radius:8px !important;" +
+        "border:1px solid " +
+        barBorder() +
+        " !important;" +
+        "z-index:2147483647 !important;" +
+        "font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif !important;" +
+        "font-size:13px !important;line-height:1.6 !important;" +
+        "box-shadow:0 4px 20px rgba(0,0,0,0.4) !important;" +
+        "max-width:280px !important;pointer-events:none !important;" +
+        "opacity:1 !important;transition:opacity 0.5s ease !important;" +
+        "isolation:isolate !important;",
     );
     n.innerHTML =
       (logoSrc
-        ? "<img src='" + logoSrc + "' style='height:16px;vertical-align:middle;" +
+        ? "<img src='" +
+          logoSrc +
+          "' style='height:16px;vertical-align:middle;" +
           "margin-right:6px;border-radius:3px;display:inline-block'>"
         : "") +
-      "<strong style='color:#4361ee'>RePage</strong> — " + modeLabel + ".<br>" +
+      "<strong style='color:#4361ee'>RePage</strong> — " +
+      modeLabel +
+      ".<br>" +
       "<span style='color:#888;font-size:11px'>" +
       "Z / ← prev &nbsp;|&nbsp; X / → next" +
       "</span>";
@@ -1658,7 +2395,9 @@
     setTimeout(function () {
       n.style.opacity = "0";
       setTimeout(function () {
-        if (n.parentNode) { n.parentNode.removeChild(n); }
+        if (n.parentNode) {
+          n.parentNode.removeChild(n);
+        }
       }, 600);
     }, 3500);
   }
@@ -1672,7 +2411,9 @@
       var old = totalPages;
       measureFixedElements();
       calculatePages();
-      if (totalPages !== old) { scheduleBarRebuild(); }
+      if (totalPages !== old) {
+        scheduleBarRebuild();
+      }
     }, CHECK_INTERVAL);
 
     // MutationObserver for instant response to DOM changes
@@ -1682,18 +2423,20 @@
         new MutationObserver(function () {
           var old = totalPages;
           calculatePages();
-          if (totalPages !== old) { scheduleBarRebuild(); }
+          if (totalPages !== old) {
+            scheduleBarRebuild();
+          }
         }).observe(targetEl, { childList: true, subtree: true });
       }
 
       // Watch for new fixed elements appearing late
       if (document.body) {
-        new MutationObserver(scheduleFixedScan)
-          .observe(document.body, {
-            childList: true, subtree: true,
-            attributes: true,
-            attributeFilter: ["style", "class"]
-          });
+        new MutationObserver(scheduleFixedScan).observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["style", "class"],
+        });
       }
     }
   }
@@ -1702,36 +2445,16 @@
   // INJECT GLOBAL CSS
   // =============================================
   function injectGlobalCSS() {
-    if (document.getElementById("repage-global-styles")) { return; }
+    if (document.getElementById("_rp_g")) {
+      return;
+    }
     var style = document.createElement("style");
-    style.id  = "repage-global-styles";
+    style.id = "_rp_g";
+    // Minimal injection: only hides scrollbars globally while active.
+    // Overflow:hidden is set via inline styles on documentElement/body in initialize().
+    // No html.repage-* class references — avoids class-based detection.
     style.textContent = [
-      "html.repage-active, html.repage-active body {",
-      "  overflow:hidden !important;",
-      "  height:100vh !important;",
-      "  max-height:100vh !important;",
-      "  margin:0 !important;",
-      "  padding:0 !important;",
-      "  scroll-behavior:auto !important;",
-      "}",
-      "html.repage-greyscale {",
-      "  filter:grayscale(100%) !important;",
-      "}",
-      "html.repage-greyscale #repage-bar {",
-      "  filter:none !important;",
-      "  isolation:isolate !important;",
-      "}",
-      "#repage-bar {",
-      "  isolation:isolate !important;",
-      "  filter:none !important;",
-      "}",
-      ".repage-subpaged {",
-      "  overflow:hidden !important;",
-      "  scrollbar-width:none !important;",
-      "}",
-      ".repage-subpaged::-webkit-scrollbar {",
-      "  display:none !important;",
-      "}"
+      "html, body { scroll-behavior:auto !important; }",
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
   }
@@ -1740,8 +2463,12 @@
   // INITIALIZE
   // =============================================
   function initialize() {
-    if (isInitialized)  { return; }
-    if (!document.body) { return; }
+    if (isInitialized) {
+      return;
+    }
+    if (!document.body) {
+      return;
+    }
     isInitialized = true;
 
     measureFixedElements();
@@ -1753,13 +2480,13 @@
       // Lock the window but leave the feed container
       // free so IntersectionObserver still fires.
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow            = "hidden";
+      document.body.style.overflow = "hidden";
 
       innerScrollEl = findInnerScrollContainer();
 
       if (!innerScrollEl) {
         var isRetries = 0;
-        var isTimer   = setInterval(function () {
+        var isTimer = setInterval(function () {
           innerScrollEl = findInnerScrollContainer();
           isRetries++;
           if (innerScrollEl || isRetries >= 20) {
@@ -1778,17 +2505,16 @@
         buildBar();
         goToPageInner(1);
       }
-
     } else if (isAIChat) {
       // ── AI chat mode ─────────────────────────────
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow            = "hidden";
+      document.body.style.overflow = "hidden";
 
       aiScrollEl = findAIScrollContainer();
 
       if (!aiScrollEl) {
         var aiRetries = 0;
-        var aiTimer   = setInterval(function () {
+        var aiTimer = setInterval(function () {
           aiScrollEl = findAIScrollContainer();
           aiRetries++;
           if (aiScrollEl || aiRetries >= 20) {
@@ -1807,7 +2533,6 @@
         buildBar();
         goToPageAI(totalPages);
       }
-
     } else if (!isGentleMode) {
       // ── Full lock mode ───────────────────────────
       document.documentElement.style.cssText =
@@ -1828,11 +2553,10 @@
       calculatePages();
       buildBar();
       goToPage(1);
-
     } else {
       // ── Gentle mode ──────────────────────────────
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow            = "hidden";
+      document.body.style.overflow = "hidden";
 
       calculatePages();
       buildBar();
@@ -1844,19 +2568,26 @@
     // ── Resize handler (debounced 120 ms) ────────
     var resizeTimer = null;
     window.addEventListener("resize", function () {
-      if (resizeTimer) { clearTimeout(resizeTimer); }
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+      }
       resizeTimer = setTimeout(function () {
         measureFixedElements();
         calculatePages();
 
         if (wrapper) {
-          wrapper.style.paddingTop    = fixedTopOffset + "px";
-          wrapper.style.paddingBottom = (BASE_BAR_HEIGHT + fixedBottomOffset) + "px";
+          wrapper.style.paddingTop = fixedTopOffset + "px";
+          wrapper.style.paddingBottom =
+            BASE_BAR_HEIGHT + fixedBottomOffset + "px";
         }
 
-        if (isAIChat)       { goToPageAI(currentPage);    }
-        else if (isInnerScroll) { goToPageInner(currentPage); }
-        else                { goToPage(currentPage);      }
+        if (isAIChat) {
+          goToPageAI(currentPage);
+        } else if (isInnerScroll) {
+          goToPageInner(currentPage);
+        } else {
+          goToPage(currentPage);
+        }
 
         // Force full rebuild so flex widths recalculate
         buildBar();
@@ -1873,6 +2604,4 @@
   // =============================================
   injectGlobalCSS();
   checkAndStart();
-
 })();
-  
