@@ -54,6 +54,7 @@
       host: "facebook.com",
       name: "facebook",
       selectors: [
+        "#scrollview",
         "[role='feed']",
         "div[data-pagelet='FeedUnit_0']",
         "[role='main']",
