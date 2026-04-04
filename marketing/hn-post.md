@@ -16,7 +16,7 @@ https://chromewebstore.google.com/detail/repage-unscroll-the-inter/bpenhlddapadg
 
 RePage is a Chrome MV3 content script that replaces infinite scroll with numbered pagination on any website — Reddit, Twitter, YouTube, Wikipedia, Gmail, ChatGPT, everything.
 
-The motivation: when platforms switched from paginated feeds to infinite scroll, session metrics rose sharply — NBC +30% mobile pageviews, Quartz +50% stories/session, Time −15pp bounce rate (Roselli 2015, citing publisher data). Separately, a 2025 Marketing Theory study (Hoang & Lascaux) found infinite scroll drives "automated" consumption where deliberate use is displaced by reflex. The Next Page button wasn't removed because users preferred scrolling — it was removed because removing it is profitable. RePage reverses that.
+The motivation: in 1965 screens averaged 1.2 hrs/day. In 2024 it's 7+ hrs. That's not content quality — it's interface design. Infinite scroll (2006), algorithmic feeds (2012), autoplay (2013), short-form loops (2016) each removed a stopping point. When platforms switched from paginated feeds to infinite scroll, session metrics jumped — NBC +30% mobile pageviews, Quartz +50% stories/session (Roselli 2015). A 2025 study in Marketing Theory (Hoang & Lascaux) found this drives "automated" consumption where deliberate use is displaced by reflex. RePage puts the stopping points back.
 
 Technical notes for HN:
 

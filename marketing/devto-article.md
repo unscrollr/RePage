@@ -1,18 +1,26 @@
 ---
-title: Infinite scroll steals up to 30% of your time — so I built a Chrome extension to stop it
+title: In 1965 screens got 1.2 hours a day. Now they get 7. The interface did that.
 published: true
-description: RePage replaces infinite scroll with numbered pagination on every website. Here's why infinite scroll is a dark pattern, who it hurts most, and how the extension works technically.
+description: RePage replaces infinite scroll with numbered pagination on every website. Here's why the 50-year growth in screen time isn't accidental — and how one design pattern is responsible.
 tags: chrome, productivity, opensource, digitalwellbeing
 cover_image: https://raw.githubusercontent.com/codycsmith41-a11y/repage/main/screenshots/main-bar.png
 ---
 
-When platforms switched from paginated feeds to infinite scroll, session times went up — in some cases dramatically. NBC reported 30% more mobile pageviews. Quartz saw 50% more stories read per session. Time.com saw bounce rate drop 15 percentage points. [These are real platform metrics.](https://adrianroselli.com/2015/05/for-infinite-scroll-bounce-rate-is.html)
+In 1965, the average American spent about 1.2 hours a day in front of a screen. Mostly television — scheduled, linear, with natural stopping points built in.
 
-That's not a coincidence. It's the point. More content consumed per session = more ad impressions = more revenue. The Next Page button wasn't removed because users preferred scrolling — it was removed because removing it is profitable.
+In 2024, US adults average over 7 hours a day. Not because the content got 6x better. Because the interfaces were redesigned to remove stopping points.
 
-This is a dark pattern — a deliberate design choice that benefits the platform at the user's expense. Most people don't know it's happening.
+That's not a coincidence. It's engineering.
 
-I built **RePage** to put that time back.
+The television era grew screen time gradually through adoption. The post-2010 acceleration is different in kind. In 2006, Aza Raskin invented infinite scroll. By 2009–2012, Twitter, Facebook, and Pinterest had adopted it. In 2012, algorithmic feeds replaced chronological ones. In 2013, YouTube autoplay became default. By 2016, TikTok's loop format had made the mechanism ubiquitous.
+
+Each change shared the same design intent: remove the moment of decision. No end of page. No "next episode in 5 seconds" — just the next episode. No sorted-by-time — just sorted by what keeps you watching.
+
+When platforms switched from paginated feeds to infinite scroll, session metrics jumped — NBC reported 30% more mobile pageviews, Quartz saw 50% more stories per session. [These are real platform numbers.](https://adrianroselli.com/2015/05/for-infinite-scroll-bounce-rate-is.html) They're why the Next Page button was removed.
+
+I built **RePage** to put it back.
+
+---
 
 ---
 

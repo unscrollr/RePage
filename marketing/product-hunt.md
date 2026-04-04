@@ -42,7 +42,13 @@ Use **Z / X** (right-hand mouse friendly) or arrow keys to flip pages.
 
 Hey PH! 👋
 
-I built RePage after going down a rabbit hole on dark patterns in UI design. When platforms switched from paginated feeds to infinite scroll, session metrics went up significantly — NBC reported 30% more mobile pageviews, Quartz saw 50% more stories read per session. These are the numbers platforms used to justify the switch. They're real, and that's the problem.
+I built RePage after going down a rabbit hole on how screen time grew from a background activity to the dominant one.
+
+In 1965, screens averaged 1.2 hours a day — TV, scheduled, with natural stopping points. By 2024, US adults average 7+ hours. The content didn't get 6x better. The interfaces were redesigned to remove the moments where you'd stop.
+
+The timeline: infinite scroll (2006), adopted by Twitter/Facebook/Pinterest (2009–2012), algorithmic feeds replacing chronological (2012), YouTube autoplay default (2013), TikTok's loop format (2016). Every step removed a decision point. When platforms switched from paginated feeds to infinite scroll, session metrics jumped — NBC reported 30% more mobile pageviews, Quartz 50% more stories per session. A 2025 Marketing Theory study (Hoang & Lascaux) found this produces "automated" consumption: users opening apps without conscious thought, reflex displacing intent.
+
+RePage is the counterweight.
 
 This isn't accidental. Infinite scroll mimics the continuous visual flow that signals movement through a physical environment — the same neurological mechanism that motivated exploration in our evolutionary past. Platforms exploit this. [Utrecht University researchers](https://www.uu.nl/en/news/researchers-advise-the-house-of-representatives-education-needed-on-safe-screen-use-for-children) specifically called this out to parliament as a mechanism disproportionately harming children and neurodivergent users.
 
