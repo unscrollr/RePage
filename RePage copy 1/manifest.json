@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RePage - Unscroll the Internet",
-  "version": "4.1",
+  "version": "4.2",
   "description": "Eliminates infinite scroll from every website. Browse the web in pages, like reading a book. Free and open source.",
   "permissions": ["storage", "activeTab", "tabs"],
   "icons": {

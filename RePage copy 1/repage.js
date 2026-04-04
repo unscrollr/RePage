@@ -69,6 +69,12 @@
         "main",
       ],
     },
+    {
+      host: "google.com",
+      name: "google-search",
+      // Only activated on /search path (enforced in checkAndStart)
+      selectors: ["#rso", "#search", "#main", "body"],
+    },
   ];
 
   // =============================================
@@ -104,6 +110,30 @@
     { host: "character.ai", name: "character" },
     { host: "huggingface.co", name: "hf" },
   ];
+
+  // Sidebar/history panel selectors for AI chat sites.
+  // These are full-height panels skipped by the generic sub-scroll height filter,
+  // so we attach them explicitly after AI chat init.
+  var AI_SIDEBAR_SELECTORS = {
+    chatgpt: [
+      "nav[aria-label='Chat history']",
+      "nav div[class*='overflow-y-auto']",
+      "nav[class*='overflow']",
+    ],
+    claude: [
+      "nav[aria-label*='conversation']",
+      "nav div[class*='overflow']",
+      "[data-testid='conversation-list']",
+    ],
+    gemini: [
+      "nav[class*='overflow']",
+      "chat-history-list",
+      "[class*='history-list']",
+    ],
+    perplexity: ["nav div[class*='overflow']", "[class*='thread-list']"],
+    copilot: ["nav", "[class*='thread-list']"],
+    mistral: ["nav div[class*='overflow']", "[class*='conversation-list']"],
+  };
 
   var AI_SCROLL_SELECTORS = {
     chatgpt: [
@@ -162,6 +192,7 @@
   var aiChatType = null;
   var aiScrollEl = null;
 
+  var scrollLockInterval = null;
   var activeModal = null;
   var modalPage = 1;
   var modalTotalPages = 1;
@@ -415,7 +446,9 @@
     var vh = window.innerHeight,
       vw = window.innerWidth;
     var ownIds = ["repage-wrapper", "repage-modal-bar"];
-    var all = document.querySelectorAll("*");
+    var all = document.querySelectorAll(
+      "*:not(script):not(style):not(meta):not(link):not(noscript)",
+    );
 
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
@@ -624,8 +657,8 @@
         continue;
       }
 
-      // Skip fixed-position overlays (likely modals/tooltips)
-      if (cs.position === "fixed" || cs.position === "sticky") {
+      // Skip fixed-position overlays (modals/tooltips) — sticky is fine (TOC, sidebars)
+      if (cs.position === "fixed") {
         continue;
       }
 
@@ -633,10 +666,11 @@
       if (rect.width < 80) {
         continue;
       }
-      if (rect.height < 100) {
+      if (rect.height < 60) {
         continue;
       }
-      if (rect.height > window.innerHeight * 0.85) {
+      // Only skip if it fills essentially the full viewport (likely the main scroll area)
+      if (rect.height > window.innerHeight * 0.97) {
         continue;
       }
 
@@ -700,6 +734,11 @@
       }
       bar.style.display = "flex";
 
+      // Scale bar content to available width
+      var w = el.clientWidth || 300;
+      var showNumbers = w >= 220;
+
+      // Prev arrow
       bar.appendChild(
         makeSubBtn(
           "‹",
@@ -711,33 +750,47 @@
         ),
       );
 
-      var nums = getPageNumbers(state.page, state.totalPages);
-      for (var i = 0; i < nums.length; i++) {
-        if (nums[i] === "dots") {
-          var d = document.createElement("span");
-          d.textContent = "…";
-          d.style.cssText =
-            "color:" +
-            dotsCol() +
-            ";padding:0 3px;font-size:12px;" +
-            "display:flex;align-items:center;";
-          bar.appendChild(d);
-        } else {
-          (function (pn) {
-            bar.appendChild(
-              makeSubBtn(
-                String(pn),
-                true,
-                function () {
-                  goTo(pn);
-                },
-                pn === state.page,
-              ),
-            );
-          })(nums[i]);
+      if (showNumbers) {
+        // Numbered page buttons with smart truncation
+        var nums = getPageNumbers(state.page, state.totalPages);
+        for (var i = 0; i < nums.length; i++) {
+          if (nums[i] === "dots") {
+            var d = document.createElement("span");
+            d.textContent = "…";
+            d.style.cssText =
+              "color:" +
+              dotsCol() +
+              ";padding:0 3px;font-size:11px;" +
+              "display:flex;align-items:center;";
+            bar.appendChild(d);
+          } else {
+            (function (pn) {
+              bar.appendChild(
+                makeSubBtn(
+                  String(pn),
+                  true,
+                  function () {
+                    goTo(pn);
+                  },
+                  pn === state.page,
+                ),
+              );
+            })(nums[i]);
+          }
         }
+      } else {
+        // Narrow: just show page indicator in centre
+        var info = document.createElement("span");
+        info.textContent = state.page + "/" + state.totalPages;
+        info.style.cssText =
+          "color:" +
+          infoCol() +
+          ";font-size:10px;display:flex;flex:1;" +
+          "align-items:center;justify-content:center;padding:0 4px;white-space:nowrap;";
+        bar.appendChild(info);
       }
 
+      // Next arrow
       bar.appendChild(
         makeSubBtn(
           "›",
@@ -748,20 +801,11 @@
           false,
         ),
       );
-
-      var info = document.createElement("span");
-      info.textContent = state.page + "/" + state.totalPages;
-      info.style.cssText =
-        "color:" +
-        infoCol() +
-        ";font-size:10px;display:flex;" +
-        "align-items:center;padding:0 6px;white-space:nowrap;";
-      bar.appendChild(info);
     }
 
     var bar = document.createElement("div");
     bar.style.cssText =
-      "position:sticky;bottom:0;left:0;width:100%;height:32px;" +
+      "position:sticky;bottom:0;left:0;width:100%;height:26px;" +
       "display:flex;flex-direction:row;justify-content:center;" +
       "align-items:stretch;background:" +
       barBg() +
@@ -804,7 +848,7 @@
     btn.textContent = label;
     btn.style.cssText =
       "display:flex;align-items:center;justify-content:center;" +
-      "height:100%;padding:0 8px;border:none;" +
+      "height:100%;padding:0 6px;border:none;" +
       "border-right:1px solid " +
       btnBorder() +
       ";" +
@@ -814,7 +858,7 @@
       "color:" +
       (isActive ? btnColAct() : btnCol()) +
       ";" +
-      "font-size:13px;font-weight:" +
+      "font-size:11px;font-weight:" +
       (isActive ? "700" : "500") +
       ";" +
       "cursor:" +
@@ -824,7 +868,7 @@
       (enabled ? "1" : "0.35") +
       ";" +
       "pointer-events:auto;position:static;" +
-      "min-width:28px;box-sizing:border-box;border-radius:0;";
+      "min-width:22px;box-sizing:border-box;border-radius:0;";
     if (enabled && onClick) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -1012,6 +1056,29 @@
     return false;
   }
 
+  // Attach sub-scrollers to AI chat sidebars (full-height panels that the generic
+  // height filter would skip). Called after the main AI chat thread is initialised.
+  function attachAIChatSidebars() {
+    if (!isAIChat || !aiChatType) return;
+    var sels = AI_SIDEBAR_SELECTORS[aiChatType];
+    if (!sels) return;
+    for (var s = 0; s < sels.length; s++) {
+      var el = document.querySelector(sels[s]);
+      if (!el || el._rpSub) continue;
+      if (el.scrollHeight <= el.clientHeight + 10) continue;
+      var cs = window.getComputedStyle(el);
+      var ov = cs.overflowY || cs.overflow;
+      if (
+        ov !== "auto" &&
+        ov !== "scroll" &&
+        ov !== "overlay" &&
+        ov !== "hidden"
+      )
+        continue;
+      attachSubScroller(el);
+    }
+  }
+
   function detectSocialSite() {
     var host = window.location.hostname.replace("www.", "");
     for (var i = 0; i < SOCIAL_SITES.length; i++) {
@@ -1173,6 +1240,12 @@
   // =============================================
   function checkAndStart() {
     var host = (window.location.hostname || "").replace("www.", "");
+    var path = window.location.pathname || "";
+
+    // www.google.com: only run on /search — skip Maps, Images, Shopping, etc.
+    if (host === "google.com" && path.indexOf("/search") !== 0) {
+      return;
+    }
 
     chrome.storage.sync.get({ skipSites: null }, function (data) {
       var skipList = data.skipSites === null ? DEFAULT_SKIP : data.skipSites;
@@ -1257,7 +1330,7 @@
       return;
     }
     lastSPAUrl = newUrl;
-    if (!isInnerScroll && !isGentleMode) {
+    if (!isInnerScroll && !isGentleMode && !isAIChat) {
       return;
     }
     // Tear down and re-init after SPA content settles
@@ -1317,6 +1390,19 @@
     }
     wrapper = null;
 
+    // Remove sub-scroll bars and clear markers
+    for (var si = 0; si < subScrollers.length; si++) {
+      var ss = subScrollers[si];
+      if (ss.bar && ss.bar.parentNode) {
+        ss.bar.parentNode.removeChild(ss.bar);
+      }
+      if (ss.el) {
+        ss.el._rpSub = false;
+        ss.el.style.removeProperty("overflow");
+        ss.el.style.removeProperty("scrollbar-width");
+      }
+    }
+
     // Reset state
     isInitialized = false;
     currentPage = 1;
@@ -1324,6 +1410,12 @@
     innerScrollEl = null;
     aiScrollEl = null;
     subScrollers = [];
+
+    // Clear scroll-lock interval
+    if (scrollLockInterval) {
+      clearInterval(scrollLockInterval);
+      scrollLockInterval = null;
+    }
 
     // Restore scrolling
     document.documentElement.style.overflow = "";
@@ -1335,7 +1427,7 @@
       document.documentElement.style.overflow = "hidden";
     }
 
-    if (isInnerScroll || isGentleMode) {
+    if (isInnerScroll || isGentleMode || isAIChat) {
       patchHistoryForSPA();
     }
 
@@ -1508,7 +1600,7 @@
 
     document.addEventListener("keydown", handleKeys, { capture: true });
 
-    setInterval(function () {
+    scrollLockInterval = setInterval(function () {
       if (window.scrollY !== 0 || window.scrollX !== 0) {
         window.scrollTo(0, 0);
       }
@@ -1533,13 +1625,20 @@
   // KEYBOARD HANDLER
   // =============================================
   function handleKeys(e) {
+    // Don't intercept keys while user is typing
     var tag =
       e.target && e.target.tagName ? e.target.tagName.toUpperCase() : "";
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
       return;
     }
-    if (e.target && e.target.isContentEditable) {
-      return;
+    // Walk up the DOM — catch nested divs inside contentEditable editors
+    var node = e.target;
+    while (node) {
+      if (node.isContentEditable) return;
+      var role = node.getAttribute && node.getAttribute("role");
+      if (role === "textbox" || role === "searchbox" || role === "combobox")
+        return;
+      node = node.parentElement;
     }
     if (e.metaKey || e.ctrlKey || e.altKey) {
       return;
@@ -1551,8 +1650,7 @@
       key === "x" ||
       key === "X" ||
       key === "ArrowRight" ||
-      key === "PageDown" ||
-      key === " "
+      key === "PageDown"
     ) {
       e.preventDefault();
       e.stopPropagation();
@@ -2598,6 +2696,11 @@
     startModalWatcher();
     startMonitor();
     startSubScrollWatcher();
+    // AI chat sidebars are full-height so generic filter skips them; attach explicitly
+    if (isAIChat) {
+      setTimeout(attachAIChatSidebars, 2000);
+      setTimeout(attachAIChatSidebars, 5000);
+    }
   }
 
   // =============================================
